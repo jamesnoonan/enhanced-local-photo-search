@@ -12,7 +12,7 @@ class Spinner(QWidget):
         self.radius = radius
         self.angle = 0
 
-        self.timer = QTimer(self)
+        self.timer: QTimer = QTimer(self)
         self.timer.timeout.connect(self.rotate)
         self.timer.start(100)  # speed of rotation
 
@@ -37,9 +37,3 @@ class Spinner(QWidget):
             painter.rotate(self.angle + i * (360 / self.lines))
             painter.drawRoundedRect(self.radius, -self.line_width // 2, self.line_length, self.line_width, 2, 2)
             painter.restore()
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    spinner = Spinner()
-    spinner.show()
-    sys.exit(app.exec())
