@@ -2,9 +2,9 @@ import sys
 
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
 
-from imageUtils import create_thumbnails
-from view.initialView import InitialView
-from view.searchView import SearchView
+from utils.ImageUtils import create_thumbnails
+from view.InitialView import InitialView
+from view.SearchView import SearchView
 
 
 class MainWindow(QMainWindow):

@@ -1,7 +1,6 @@
-from PyQt6.QtWidgets import QWidget, QApplication
+from PyQt6.QtWidgets import QWidget
 from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtGui import QPainter, QColor, QPen
-import sys
+from PyQt6.QtGui import QPainter, QColor
 
 class Spinner(QWidget):
     def __init__(self, parent=None, lines=12, line_length=10, line_width=3, radius=10):
@@ -14,7 +13,7 @@ class Spinner(QWidget):
 
         self.timer: QTimer = QTimer(self)
         self.timer.timeout.connect(self.rotate)
-        self.timer.start(100)  # speed of rotation
+        self.timer.start(100)
 
         self.setFixedSize((radius + line_length) * 2, (radius + line_length) * 2)
 

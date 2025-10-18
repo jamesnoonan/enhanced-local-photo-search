@@ -1,8 +1,8 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QHBoxLayout
 
-from imageUtils import open_folder
-from widgets.spinner import Spinner
+from utils.ImageUtils import open_folder
+from widgets.Spinner import Spinner
 
 
 class InitialView(QWidget):
