@@ -30,4 +30,4 @@ class TopRow(QWidget):
 
     def on_key_press(self, event):
         if event.key() == Qt.Key.Key_Enter:
-            self.on_search(self.search_box_line_edit.text())
+            self.on_search()

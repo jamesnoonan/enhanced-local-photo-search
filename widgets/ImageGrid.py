@@ -1,5 +1,3 @@
-import math
-
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QWidget, QGridLayout
@@ -14,10 +12,11 @@ image_spacing = 10
 image_limit = 250
 
 class ImageGrid(QWidget):
-    def __init__(self, image_paths):
+    def __init__(self, root_dir, image_paths):
         super().__init__()
+        self.root_dir = root_dir
         self.image_paths = image_paths[:image_limit]
-        self.images_per_row = 4
+        self.images_per_row = 6
         self.image_widgets = []
         self.grid_layout = None
 
@@ -37,9 +36,7 @@ class ImageGrid(QWidget):
         # Create image labels
         row, col = 0, 0
         for i, image_path in enumerate(self.image_paths):
-            thumbnail_path = get_thumbnail_path(image_path)
-            print(image_path)
-            print(thumbnail_path)
+            thumbnail_path = get_thumbnail_path(self.root_dir, image_path)
             pixmap = QPixmap(thumbnail_path)
 
             # Scale to thumbnail
@@ -63,34 +60,34 @@ class ImageGrid(QWidget):
                 row += 1
 
     def update_grid(self, parent_width):
-        # pass
+        pass
         # Calculate how many images fit per row
-        new_images_per_row = (parent_width - 50) / (image_width + image_spacing)
-        new_images_per_row = max(1, math.floor(new_images_per_row))
-
-        if new_images_per_row != self.images_per_row:
-            print(f"Updating grid layout: {self.images_per_row} → {new_images_per_row}")
-            self.images_per_row = new_images_per_row
-
-            layout = self.grid_layout
-            if layout is not None:
-                while layout.count():
-                    item = layout.takeAt(0)
-                    widget = item.widget()
-                    if widget is not None:
-                        layout.removeWidget(widget)
-
-            # row, col = 0, 0
-            # for label in self.image_widgets:
-            #     layout.addWidget(label, row, col)
-            #     col += 1
-            #     if col >= self.images_per_row:
-            #         col = 0
-            #         row += 1
-
-            self.load_images()
-            layout.update()  # Repaints and may recalc sizes
-            layout.invalidate()  # Marks the layout as dirty; next event loop pass will recompute
-
-            self.update()
-            self.setLayout(layout)
+        # new_images_per_row = (parent_width - 50) / (image_width + image_spacing)
+        # new_images_per_row = max(1, math.floor(new_images_per_row))
+        #
+        # if new_images_per_row != self.images_per_row:
+        #     print(f"Updating grid layout: {self.images_per_row} → {new_images_per_row}")
+        #     self.images_per_row = new_images_per_row
+        #
+        #     layout = self.grid_layout
+        #     if layout is not None:
+        #         while layout.count():
+        #             item = layout.takeAt(0)
+        #             widget = item.widget()
+        #             if widget is not None:
+        #                 layout.removeWidget(widget)
+        #
+        #     # row, col = 0, 0
+        #     # for label in self.image_widgets:
+        #     #     layout.addWidget(label, row, col)
+        #     #     col += 1
+        #     #     if col >= self.images_per_row:
+        #     #         col = 0
+        #     #         row += 1
+        #
+        #     self.load_images()
+        #     layout.update()  # Repaints and may recalc sizes
+        #     layout.invalidate()  # Marks the layout as dirty; next event loop pass will recompute
+        #
+        #     self.update()
+        #     self.setLayout(layout)

@@ -3,7 +3,8 @@ import os
 import re
 
 from utils.ImageCaptioning import ImageCaptioner
-from utils.ImageUtils import collect_images, get_thumbnail_path, thumbnail_dir_name, get_original_image_path
+from utils.ImageUtils import collect_images, thumbnail_dir_name, get_original_image_path
+from widgets.ProgressDialog import show_progress_dialog
 
 index_filename = ".search-index"
 
@@ -18,6 +19,7 @@ def index_images(folder_path):
     image_list = collect_images(thumbnail_path)
     image_data = []
 
+    progress = show_progress_dialog("Creating search index...", len(image_list))
     image_captioner = ImageCaptioner()
 
     for i, image_path in enumerate(image_list):
@@ -26,6 +28,8 @@ def index_images(folder_path):
         filename = os.path.basename(image_path)
         caption = image_captioner.caption(image_path)
         image_data.append({ "path": get_original_image_path(image_path), "filename": filename.lower(), "caption": caption.lower()  })
+
+        progress.setValue(i+1)
 
     with open(file_path, "w") as index_file:
         json.dump(image_data, index_file)

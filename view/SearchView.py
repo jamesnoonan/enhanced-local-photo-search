@@ -1,8 +1,6 @@
-import os
-
 from PyQt6.QtWidgets import QWidget, QScrollArea, QVBoxLayout, QLabel
 
-from utils.ImageUtils import collect_images, thumbnail_dir_name
+from utils.ImageUtils import collect_images
 from utils.SearchUtils import index_images
 from widgets.ImageGrid import ImageGrid, image_limit
 from widgets.TopRow import TopRow
@@ -24,7 +22,7 @@ class SearchView(QWidget):
         images = collect_images(self.folder_path)
 
         self.scroll_area = QScrollArea()
-        self.image_grid = ImageGrid(images)
+        self.image_grid = ImageGrid(self.folder_path, images)
         self.scroll_area.setWidget(self.image_grid)
 
         window_layout = QVBoxLayout()
@@ -53,7 +51,7 @@ class SearchView(QWidget):
                         image_paths.append(entry["path"])
                         break
 
-        self.image_grid = ImageGrid(image_paths)
+        self.image_grid = ImageGrid(self.folder_path, image_paths)
         self.scroll_area.setWidget(self.image_grid)
 
     def resizeEvent(self, event):

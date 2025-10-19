@@ -41,4 +41,5 @@ class InitialView(QWidget):
             folder_path = open_folder()
             self.callback(folder_path)
         except Exception as e:
+            print(e)
             return row.removeWidget(loading_spinner)
