@@ -4,19 +4,19 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QWidget, QGridLayout
 
-from utils.ImageUtils import open_image
+from utils.ImageUtils import open_image, get_thumbnail_path
 from widgets.ClickableLabel import ClickableLabel
 
 image_height = 100
 image_width = 150
 image_spacing = 10
 
-
+image_limit = 250
 
 class ImageGrid(QWidget):
     def __init__(self, image_paths):
         super().__init__()
-        self.image_paths = image_paths
+        self.image_paths = image_paths[:image_limit]
         self.images_per_row = 4
         self.image_widgets = []
         self.grid_layout = None
@@ -34,12 +34,13 @@ class ImageGrid(QWidget):
     def load_images(self):
         self.image_widgets = []
 
-
-
         # Create image labels
         row, col = 0, 0
         for i, image_path in enumerate(self.image_paths):
-            pixmap = QPixmap(image_path)
+            thumbnail_path = get_thumbnail_path(image_path)
+            print(image_path)
+            print(thumbnail_path)
+            pixmap = QPixmap(thumbnail_path)
 
             # Scale to thumbnail
             pixmap = pixmap.scaled(image_width, image_height, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)

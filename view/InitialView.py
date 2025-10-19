@@ -31,11 +31,14 @@ class InitialView(QWidget):
     def select_folder(self):
         row = QHBoxLayout()
         row.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        row.addWidget(Spinner())
+
+        loading_spinner = Spinner()
+        row.addWidget(loading_spinner)
+
         self.column.addLayout(row)
 
         try:
             folder_path = open_folder()
             self.callback(folder_path)
         except Exception as e:
-            return None
+            return row.removeWidget(loading_spinner)

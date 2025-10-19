@@ -27,7 +27,7 @@ class MainWindow(QMainWindow):
         create_thumbnails(folder_path)
 
         if not self.search_view:
-            self.search_view = SearchView(folder_path + "/.thumbnails")
+            self.search_view = SearchView(folder_path)
             self.stack.addWidget(self.search_view)
 
         self.stack.setCurrentWidget(self.search_view)

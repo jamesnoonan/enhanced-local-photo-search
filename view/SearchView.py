@@ -1,8 +1,10 @@
-from PyQt6.QtWidgets import QWidget, QScrollArea, QVBoxLayout
+import os
 
-from utils.ImageUtils import collect_images
-from utils.SearchUtil import index_images
-from widgets.ImageGrid import ImageGrid
+from PyQt6.QtWidgets import QWidget, QScrollArea, QVBoxLayout, QLabel
+
+from utils.ImageUtils import collect_images, thumbnail_dir_name
+from utils.SearchUtils import index_images
+from widgets.ImageGrid import ImageGrid, image_limit
 from widgets.TopRow import TopRow
 
 class SearchView(QWidget):
@@ -19,32 +21,40 @@ class SearchView(QWidget):
 
     def init_ui(self):
         top_row = TopRow(self.on_search)
-
+        images = collect_images(self.folder_path)
 
         self.scroll_area = QScrollArea()
-        self.image_grid = ImageGrid(collect_images(self.folder_path))
+        self.image_grid = ImageGrid(images)
         self.scroll_area.setWidget(self.image_grid)
 
         window_layout = QVBoxLayout()
         window_layout.addWidget(top_row)
+        if len(images) > image_limit:
+            label = QLabel(f"Results are limited to the first {image_limit} images")
+            window_layout.addWidget(label)
         window_layout.addWidget(self.scroll_area)
 
         self.setLayout(window_layout)
 
-    def on_search(self, search_term):
+    def on_search(self, search_string):
         image_paths = []
-        for entry in self.index:
-            for token in entry["tokens"]:
-                if search_term.lower() in token:
-                    image_paths.append(entry["path"])
-                    break
 
+        if len(search_string.strip()) == 0:
+            image_paths = list(map(lambda image: image["path"], self.index))
+        else:
+            search_terms = search_string.lower().split()
 
-        # self.layout().removeWidget(self.image_grid)
+            for entry in self.index:
+                filename = entry["filename"]
+                caption = entry["caption"]
+
+                for search_term in search_terms:
+                    if search_term in filename or search_term in caption:
+                        image_paths.append(entry["path"])
+                        break
+
         self.image_grid = ImageGrid(image_paths)
         self.scroll_area.setWidget(self.image_grid)
-
-        # self.layout().addWidget(self.image_grid)
 
     def resizeEvent(self, event):
         """Handle window resize to rearrange grid."""

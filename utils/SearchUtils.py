@@ -2,22 +2,30 @@ import json
 import os
 import re
 
-from utils.ImageUtils import collect_images
+from utils.ImageCaptioning import ImageCaptioner
+from utils.ImageUtils import collect_images, get_thumbnail_path, thumbnail_dir_name, get_original_image_path
 
 index_filename = ".search-index"
 
-def index_images(root_dir):
-    file_path = os.path.join(root_dir, index_filename)
+def index_images(folder_path):
+    file_path = os.path.join(folder_path, index_filename)
     if os.path.exists(file_path):
         with open(file_path, "r") as index_file:
             return json.load(index_file)
 
-    image_list = collect_images(root_dir)
+    thumbnail_path = os.path.join(folder_path, thumbnail_dir_name)
+
+    image_list = collect_images(thumbnail_path)
     image_data = []
 
-    for image_path in image_list:
-        tokens = extract_filename_tokens(image_path)
-        image_data.append({ "path": image_path, "tokens": tokens  })
+    image_captioner = ImageCaptioner()
+
+    for i, image_path in enumerate(image_list):
+        print(f"{i+1} of {len(image_list)} {image_path}")
+
+        filename = os.path.basename(image_path)
+        caption = image_captioner.caption(image_path)
+        image_data.append({ "path": get_original_image_path(image_path), "filename": filename.lower(), "caption": caption.lower()  })
 
     with open(file_path, "w") as index_file:
         json.dump(image_data, index_file)

@@ -5,6 +5,7 @@ import sys
 from PIL import Image
 from PyQt6.QtWidgets import QFileDialog
 
+thumbnail_dir_name = ".thumbnails"
 image_extensions = ('.png', '.jpg', '.jpeg', '.bmp', '.gif', '.webp', '.tif', '.tiff')
 
 def is_image_file(filename):
@@ -13,8 +14,8 @@ def is_image_file(filename):
 def collect_images(directory_path):
     image_list = []
     for root, dirs, files in os.walk(directory_path):
-        if '.thumbnails' in dirs:
-            dirs.remove('.thumbnails') # Skip .thumbnails directories to prevent nesting
+        if thumbnail_dir_name in dirs:
+            dirs.remove(thumbnail_dir_name) # Skip .thumbnails directories to prevent nesting
 
         for file in files:
             if is_image_file(file):
@@ -29,18 +30,25 @@ def open_folder():
 
     return folder_path
 
-def open_image(image_path):
-    parts = image_path.split(os.sep)
-    if ".thumbnails" in parts:
-        idx = parts.index(".thumbnails")
-        # Reconstruct path without the '.thumbnails' part
-        new_path = os.sep.join(parts[:idx] + parts[idx + 1:])
-        if os.path.exists(new_path):
-            image_path = new_path
-            print(f"Redirected to original image: {image_path}")
-        else:
-            print(f"Original image not found at '{new_path}', using thumbnail path.")
+def get_original_image_path(thumbnail_path):
+    dirpath, thumb_filename = os.path.split(thumbnail_path)
 
+    if os.path.basename(dirpath) == thumbnail_dir_name:
+        original_dir = os.path.dirname(dirpath)
+    else:
+        raise ValueError(f"Expected '.thumbnails' directory in path: {thumbnail_path}")
+
+    name, _ = os.path.splitext(thumb_filename)  # ("photo1_tiff", ".jpg")
+    if "_" not in name:
+        raise ValueError(f"Thumbnail filename does not follow expected format: {thumb_filename}")
+
+    base_name, orig_ext = name.rsplit("_", 1)
+    original_filename = f"{base_name}.{orig_ext}"
+    original_path = os.path.join(original_dir, original_filename)
+
+    return original_path
+
+def open_image(image_path):
     try:
         if sys.platform == "win32":
             os.startfile(image_path)  # Windows
@@ -53,15 +61,31 @@ def open_image(image_path):
     except Exception as e:
         print(f"An error occurred: {e}")
 
+def get_thumbnail_path(img_path):
+    """
+    Given an original image path like:
+      /some/dir/photo1.tiff
+    Return the corresponding thumbnail path:
+      /some/dir/.thumbnails/photo1_tiff.jpg
+    """
+    dirpath, filename = os.path.split(img_path)
+    name, ext = os.path.splitext(filename)
+    ext_clean = ext.lower().lstrip('.')  # ".tiff" → "tiff"
+
+    thumb_dir = os.path.join(dirpath, ".thumbnails")
+
+    thumb_filename = f"{name}_{ext_clean}.jpg"
+    thumb_path = os.path.join(thumb_dir, thumb_filename)
+    return thumb_path
+
 def create_thumbnails(root_dir, thumbnail_size=(256, 256)):
     all_images = collect_images(root_dir)
 
-    for img_path in all_images:
-        dirpath, filename = os.path.split(img_path)
-        thumb_dir = os.path.join(dirpath, ".thumbnails")
-        os.makedirs(thumb_dir, exist_ok=True)
+    thumb_dir = os.path.join(root_dir, ".thumbnails")
+    os.makedirs(thumb_dir, exist_ok=True)
 
-        thumb_path = os.path.join(thumb_dir, filename)
+    for img_path in all_images:
+        thumb_path = get_thumbnail_path(img_path)
 
         if os.path.exists(thumb_path):
             continue  # Skip if thumbnail already exists
@@ -69,7 +93,9 @@ def create_thumbnails(root_dir, thumbnail_size=(256, 256)):
         try:
             with Image.open(img_path) as img:
                 img.thumbnail(thumbnail_size)
-                img.save(thumb_path)
+                if img.mode in ("RGBA", "P"):
+                    img = img.convert("RGB")
+                img.save(thumb_path, "JPEG")
                 print(f"Thumbnail created: {thumb_path}")
         except Exception as e:
             print(f"Failed to create thumbnail for {img_path}: {e}")
