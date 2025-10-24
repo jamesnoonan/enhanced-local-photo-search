@@ -1,9 +1,10 @@
 from PyQt6.QtWidgets import QWidget, QScrollArea, QVBoxLayout, QLabel
 
-from utils.ImageUtils import collect_images
+from utils.ImageUtils import collect_images, page_size_limit
 from utils.SearchUtils import index_images
-from widgets.ImageGrid import ImageGrid, image_limit
-from widgets.TopRow import TopRow
+from widgets.ImageGrid import ImageGrid
+from widgets.Pagination import PaginationControls
+from widgets.SearchBar import SearchBar
 
 class SearchView(QWidget):
     def __init__(self, folder_path):
@@ -11,28 +12,52 @@ class SearchView(QWidget):
 
         self.scroll_area = None
         self.image_grid = None
+        self.pagination_controls = None
         self.folder_path = folder_path
         self.index = index_images(folder_path)
 
-        self.image_paths = []
+        self.images = []
+        self.filtered_images = []
+        self.page_index = 0
         self.init_ui()
 
     def init_ui(self):
-        top_row = TopRow(self.on_search)
-        images = collect_images(self.folder_path)
+        top_row = SearchBar(self.on_search)
+        self.images = collect_images(self.folder_path)
+        self.filtered_images = self.images
 
         self.scroll_area = QScrollArea()
-        self.image_grid = ImageGrid(self.folder_path, images)
-        self.scroll_area.setWidget(self.image_grid)
+        self.update_image_grid()
 
         window_layout = QVBoxLayout()
         window_layout.addWidget(top_row)
-        if len(images) > image_limit:
-            label = QLabel(f"Results are limited to the first {image_limit} images")
-            window_layout.addWidget(label)
         window_layout.addWidget(self.scroll_area)
 
         self.setLayout(window_layout)
+        self.init_pagination()
+
+    def init_pagination(self):
+        layout = self.layout()
+        if self.pagination_controls is not None:
+            layout.removeWidget(self.pagination_controls)
+
+        self.page_index = 0
+        total_page_count = len(self.filtered_images) // page_size_limit + 1
+
+        self.pagination_controls = PaginationControls(total_page_count)
+        self.pagination_controls.page_changed.connect(self.change_page)
+
+        layout.addWidget(self.pagination_controls)
+
+    def update_image_grid(self):
+        self.image_grid = ImageGrid(self.folder_path, self.images, self.page_index)
+        self.scroll_area.setWidget(self.image_grid)
+
+        self.update()
+
+    def change_page(self, page_index):
+        self.page_index = page_index
+        self.update_image_grid()
 
     def on_search(self, search_string):
         image_paths = []
@@ -51,10 +76,8 @@ class SearchView(QWidget):
                         image_paths.append(entry["path"])
                         break
 
-        self.image_grid = ImageGrid(self.folder_path, image_paths)
-        self.scroll_area.setWidget(self.image_grid)
+        self.filtered_images = image_paths
+        self.init_pagination()
 
-    def resizeEvent(self, event):
-        """Handle window resize to rearrange grid."""
-        super().resizeEvent(event)
-        self.image_grid.update_grid(self.width())
+        self.image_grid = ImageGrid(self.folder_path, image_paths, self.page_index)
+        self.scroll_area.setWidget(self.image_grid)

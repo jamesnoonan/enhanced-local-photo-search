@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import QFileDialog
 
 from widgets.ProgressDialog import show_progress_dialog
 
+page_size_limit = 30
 thumbnail_dir_name = ".thumbnails"
 image_extensions = ('.png', '.jpg', '.jpeg', '.bmp', '.gif', '.webp', '.tif', '.tiff')
 
