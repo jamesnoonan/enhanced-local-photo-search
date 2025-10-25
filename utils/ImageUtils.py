@@ -5,6 +5,7 @@ import sys
 from PIL import Image
 from PyQt6.QtWidgets import QFileDialog
 
+from utils.ErrorUtils import show_error
 from widgets.ProgressDialog import show_progress_dialog
 
 page_size_limit = 30
@@ -29,7 +30,7 @@ def collect_images(directory_path):
 def open_folder(text="Select Folder"):
     folder_path = QFileDialog.getExistingDirectory(None, text)
     if not folder_path:
-       raise Exception("Folder not found")
+       raise FileNotFoundError("Folder not found")
 
     return folder_path
 
@@ -66,18 +67,18 @@ def get_original_image_path(thumbnail_path):
     return original_path
 
 
-def open_image(image_path):
+def open_file(file_path):
     try:
         if sys.platform == "win32":
-            os.startfile(image_path)  # Windows
+            os.startfile(file_path)  # Windows
         elif sys.platform == "darwin":
-            subprocess.run(["open", image_path])  # macOS
+            subprocess.run(["open", file_path])  # macOS
         else:
-            subprocess.run(["xdg-open", image_path])  # Linux
+            subprocess.run(["xdg-open", file_path])  # Linux
     except FileNotFoundError:
-        print(f"Error: Image file not found at '{image_path}'.")
+        show_error(f"Error: Image file not found at '{file_path}'.")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        show_error(f"An error occurred: {e}")
 
 def get_thumbnail_path(root_path, img_path):
     """

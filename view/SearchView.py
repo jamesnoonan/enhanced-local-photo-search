@@ -1,6 +1,9 @@
-from PyQt6.QtWidgets import QWidget, QScrollArea, QVBoxLayout, QLabel
+import shutil
 
-from utils.ImageUtils import collect_images, page_size_limit
+from PyQt6.QtWidgets import QWidget, QScrollArea, QVBoxLayout
+
+from utils.ErrorUtils import show_error
+from utils.ImageUtils import collect_images, page_size_limit, open_folder, open_file
 from utils.SearchUtils import index_images
 from widgets.ImageGrid import ImageGrid
 from widgets.Pagination import PaginationControls
@@ -22,7 +25,7 @@ class SearchView(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        top_row = SearchBar(self.on_search, self.folder_path)
+        top_row = SearchBar(self.on_search, self.on_export, self.folder_path)
         self.images = collect_images(self.folder_path)
         self.filtered_images = self.images
 
@@ -82,3 +85,16 @@ class SearchView(QWidget):
 
         self.image_grid = ImageGrid(self.folder_path, image_paths, self.page_index)
         self.scroll_area.setWidget(self.image_grid)
+
+    def on_export(self):
+        try:
+            export_folder_path = open_folder("Choose folder to copy to")
+
+            for image_path in self.filtered_images:
+                shutil.copy(image_path, export_folder_path)
+
+            open_file(export_folder_path)
+        except FileNotFoundError:
+            print("Operation cancelled")
+        except Exception as e:
+            show_error(f"Failed to copy images to folder ({e})")

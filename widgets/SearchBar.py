@@ -6,10 +6,11 @@ from utils.SearchUtils import clear_cache
 
 
 class SearchBar(QWidget):
-    def __init__(self, on_search, folder_path):
+    def __init__(self, on_search, on_export, folder_path):
         super().__init__()
         self.search_box_line_edit = None
         self.search_callback = on_search
+        self.on_export = on_export
         self.folder_path = folder_path
         self.init_ui()
 
@@ -50,7 +51,7 @@ class SearchBar(QWidget):
         file_type_filter.addItems(image_extensions)
 
         export_button: QPushButton = QPushButton("Copy results to folder")
-
+        export_button.clicked.connect(self.on_export)
 
         clear_button: QPushButton = QPushButton("Clear cache and exit")
         clear_button.clicked.connect(self.on_clear_cache)

@@ -2,7 +2,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QWidget, QGridLayout
 
-from utils.ImageUtils import open_image, get_thumbnail_path, page_size_limit
+from utils.ImageUtils import open_file, get_thumbnail_path, page_size_limit
 from widgets.ClickableLabel import ClickableLabel
 
 image_height = 100
@@ -52,7 +52,7 @@ class ImageGrid(QWidget):
 
             label.setFixedSize(image_width, image_height)
 
-            label.clicked.connect(lambda path=image_path: open_image(path))
+            label.clicked.connect(lambda path=image_path: open_file(path))
 
             self.image_widgets.append(label)
             self.grid_layout.addWidget(label, row, col)
