@@ -5,27 +5,40 @@ import shutil
 import sys
 
 from utils.ImageCaptioning import ImageCaptioner
-from utils.ImageUtils import collect_images, thumbnail_dir_name, get_original_image_path
+from utils.ImageUtils import collect_images, thumbnail_dir_name, get_original_image_path, get_thumbnail_path
 from widgets.ProgressDialog import show_progress_dialog
 
 index_filename = ".search-index"
 
 def index_images(folder_path):
+    image_data = []
+
     file_path = os.path.join(folder_path, index_filename)
     if os.path.exists(file_path):
         with open(file_path, "r") as index_file:
-            return json.load(index_file)
+            image_data = json.load(index_file)
 
-    thumbnail_path = os.path.join(folder_path, thumbnail_dir_name)
+    thumbnail_folder_path = os.path.join(folder_path, thumbnail_dir_name)
+    thumbnail_paths = collect_images(thumbnail_folder_path)
 
-    image_list = collect_images(thumbnail_path)
-    image_data = []
+    progress = show_progress_dialog("Loading search index...", len(image_data))
+    # Remove images that already appear in the list
+    for i, entry in enumerate(image_data):
+        stored_path = entry["path"]
+        thumbnail_paths.remove(get_thumbnail_path(folder_path, stored_path))
 
-    progress = show_progress_dialog("Creating search index...", len(image_list))
+        progress.setValue(i + 1)
+    progress.close()
+
+    # Exit early if no new files
+    if len(thumbnail_paths) == 0:
+        return image_data
+
     image_captioner = ImageCaptioner()
 
-    for i, image_path in enumerate(image_list):
-        print(f"{i+1} of {len(image_list)} {image_path}")
+    progress = show_progress_dialog("Creating search index...", len(thumbnail_paths))
+    for i, image_path in enumerate(thumbnail_paths):
+        print(f"{i+1} of {len(thumbnail_paths)} {image_path}")
 
         filename = os.path.basename(image_path)
         caption = image_captioner.caption(image_path)
@@ -36,6 +49,7 @@ def index_images(folder_path):
     with open(file_path, "w") as index_file:
         json.dump(image_data, index_file)
 
+    progress.close()
     return image_data
 
 

@@ -16,7 +16,7 @@ def is_image_file(filename):
     return os.path.splitext(filename.lower())[1] in image_extensions
 
 def collect_images(directory_path):
-    image_list = []
+    image_list: list[str] = []
     for root, dirs, files in os.walk(directory_path):
         if thumbnail_dir_name in dirs:
             dirs.remove(thumbnail_dir_name) # Skip .thumbnails directories to prevent nesting
