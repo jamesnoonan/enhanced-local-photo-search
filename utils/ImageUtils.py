@@ -24,7 +24,7 @@ def collect_images(directory_path):
             if is_image_file(file):
                 full_path = os.path.join(root, file)
                 image_list.append(full_path)
-    return image_list
+    return sorted(image_list, key=lambda path: os.path.basename(path).lower())
 
 def open_folder():
     folder_path = QFileDialog.getExistingDirectory(None, "Select Image Folder")

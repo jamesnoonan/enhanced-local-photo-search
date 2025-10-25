@@ -30,6 +30,7 @@ class SearchView(QWidget):
         self.update_image_grid()
 
         window_layout = QVBoxLayout()
+        window_layout.setSpacing(0)
         window_layout.addWidget(top_row)
         window_layout.addWidget(self.scroll_area)
 

@@ -46,6 +46,9 @@ class SearchBar(QWidget):
         file_type_filter.addItem("All file types")
         file_type_filter.addItems(image_extensions)
 
+        export_button: QPushButton = QPushButton("Copy results to folder")
+
+
         clear_button: QPushButton = QPushButton("Clear cache and exit")
         clear_button.clicked.connect(self.on_clear)
 
@@ -65,6 +68,7 @@ class SearchBar(QWidget):
 
         filter_row.addWidget(checkbox_row_widget)
         filter_row.addWidget(file_type_filter)
+        filter_row.addWidget(export_button)
         filter_row.addWidget(clear_button)
 
         return filter_row
