@@ -26,13 +26,12 @@ def collect_images(directory_path):
                 image_list.append(full_path)
     return sorted(image_list, key=lambda path: os.path.basename(path).lower())
 
-def open_folder():
-    folder_path = QFileDialog.getExistingDirectory(None, "Select Image Folder")
+def open_folder(text="Select Folder"):
+    folder_path = QFileDialog.getExistingDirectory(None, text)
     if not folder_path:
        raise Exception("Folder not found")
 
     return folder_path
-
 
 def get_original_image_path(thumbnail_path):
     parts = thumbnail_path.split(os.sep)
@@ -109,28 +108,33 @@ def create_thumbnails(root_dir, thumbnail_size=(256, 256)):
     thumb_dir = os.path.join(root_dir, ".thumbnails")
     os.makedirs(thumb_dir, exist_ok=True)
 
-    for i, img_path in enumerate(all_images):
+    for img_index, img_path in enumerate(all_images):
         if progress.wasCanceled():
             print("Thumbnail creation canceled by user")
             break
 
         thumb_path = get_thumbnail_path(root_dir, img_path)
         if os.path.exists(thumb_path):
-            progress.setValue(i + 1)
+            progress.setValue(img_index + 1)
             continue  # Skip if thumbnail already exists
 
         os.makedirs(os.path.dirname(thumb_path), exist_ok=True)
 
         try:
             with Image.open(img_path) as img:
+                if img.mode not in ("RGB", "L"):
+                    if img.mode == "I;16":
+                        img = img.point(lambda i: i * (1. / 256)).convert("L")
+                    else:
+                        img = img.convert("RGB")
+
                 img.thumbnail(thumbnail_size)
-                if img.mode in ("RGBA", "P"):
-                    img = img.convert("RGB")
                 img.save(thumb_path, "JPEG")
                 print(f"Thumbnail created: {thumb_path}")
+
         except Exception as e:
             print(f"Failed to create thumbnail for {img_path}: {e}")
 
-        progress.setValue(i + 1)
+        progress.setValue(img_index + 1)
 
     progress.close()

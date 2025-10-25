@@ -38,7 +38,7 @@ class InitialView(QWidget):
         self.column.addLayout(row)
 
         try:
-            folder_path = open_folder()
+            folder_path = open_folder("Choose source folder")
             self.callback(folder_path)
         except Exception as e:
             print(e)
