@@ -4,6 +4,8 @@ import re
 import shutil
 import sys
 
+from PyQt6.QtWidgets import QMessageBox
+
 from utils.ImageCaptioning import ImageCaptioner
 from utils.ImageUtils import collect_images, thumbnail_dir_name, get_original_image_path, get_thumbnail_path
 from widgets.ProgressDialog import show_progress_dialog
@@ -74,6 +76,14 @@ def extract_filename_tokens(file_path):
     return tokens
 
 def clear_cache(folder_path):
+    button = QMessageBox.question(
+        None,
+        "Are you sure?",
+        "This operation will delete all of the created thumbnails and search index, which may take a long time to regenerate. Are you sure?"
+    )
+    if button != QMessageBox.StandardButton.Yes:
+        return
+
     # Delete all images in .thumbnails folder
     thumbnail_path = os.path.join(folder_path, thumbnail_dir_name)
     if os.path.exists(thumbnail_path):
