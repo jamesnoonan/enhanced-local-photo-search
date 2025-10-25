@@ -2,12 +2,15 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QLineEdit, QPushButton, QHBoxLayout, QWidget, QVBoxLayout, QComboBox, QCheckBox, QSizePolicy
 
 from utils.ImageUtils import image_extensions
+from utils.SearchUtils import clear_cache
+
 
 class SearchBar(QWidget):
-    def __init__(self, on_search):
+    def __init__(self, on_search, folder_path):
         super().__init__()
         self.search_box_line_edit = None
         self.search_callback = on_search
+        self.folder_path = folder_path
         self.init_ui()
 
     def init_ui(self):
@@ -50,7 +53,7 @@ class SearchBar(QWidget):
 
 
         clear_button: QPushButton = QPushButton("Clear cache and exit")
-        clear_button.clicked.connect(self.on_clear)
+        clear_button.clicked.connect(self.on_clear_cache)
 
         checkbox_row_widget = QWidget()
         checkbox_row = QHBoxLayout(checkbox_row_widget)
@@ -76,8 +79,8 @@ class SearchBar(QWidget):
     def on_search(self):
         self.search_callback(self.search_box_line_edit.text())
 
-    def on_clear(self):
-        pass
+    def on_clear_cache(self):
+        clear_cache(self.folder_path)
 
     def on_key_press(self, event):
         if event.key() == Qt.Key.Key_Enter:

@@ -1,6 +1,8 @@
 import json
 import os
 import re
+import shutil
+import sys
 
 from utils.ImageCaptioning import ImageCaptioner
 from utils.ImageUtils import collect_images, thumbnail_dir_name, get_original_image_path
@@ -56,3 +58,17 @@ def extract_filename_tokens(file_path):
     # Remove empty tokens and convert to lowercase
     tokens = [token.lower() for token in tokens if token]
     return tokens
+
+def clear_cache(folder_path):
+    # Delete all images in .thumbnails folder
+    thumbnail_path = os.path.join(folder_path, thumbnail_dir_name)
+    if os.path.exists(thumbnail_path):
+        shutil.rmtree(thumbnail_path)
+
+    # Delete search index file
+    search_index_path = os.path.join(folder_path, index_filename)
+    if os.path.exists(search_index_path):
+        os.remove(search_index_path)
+
+    # Close program
+    sys.exit(0)

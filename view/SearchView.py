@@ -22,7 +22,7 @@ class SearchView(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        top_row = SearchBar(self.on_search)
+        top_row = SearchBar(self.on_search, self.folder_path)
         self.images = collect_images(self.folder_path)
         self.filtered_images = self.images
 
