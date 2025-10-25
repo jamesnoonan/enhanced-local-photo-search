@@ -2,6 +2,7 @@ import shutil
 
 from PyQt6.QtWidgets import QWidget, QScrollArea, QVBoxLayout
 
+from data.SearchQuery import SearchQuery
 from utils.ErrorUtils import show_error
 from utils.ImageUtils import collect_images, page_size_limit, open_folder, open_file
 from utils.SearchUtils import index_images
@@ -16,12 +17,14 @@ class SearchView(QWidget):
         self.scroll_area = None
         self.image_grid = None
         self.pagination_controls = None
+
         self.folder_path = folder_path
         self.index = index_images(folder_path)
 
         self.images = []
         self.filtered_images = []
         self.page_index = 0
+
         self.init_ui()
 
     def init_ui(self):
@@ -63,21 +66,24 @@ class SearchView(QWidget):
         self.page_index = page_index
         self.update_image_grid()
 
-    def on_search(self, search_string):
+    def on_search(self, search_query: SearchQuery):
         image_paths = []
 
-        if len(search_string.strip()) == 0:
-            image_paths = list(map(lambda image: image["path"], self.index))
-        else:
-            search_terms = search_string.lower().split()
+        if search_query.search_filenames or search_query.search_ai_data:
+            if len(search_query.query_terms) == 0:
+                image_paths = list(map(lambda image: image["path"], self.index))
+            else:
+                for entry in self.index:
+                    filename = entry["filename"]
+                    caption = entry["caption"]
+                    extension = "."  + (entry["path"].split(".")[-1]).lower()
 
-            for entry in self.index:
-                filename = entry["filename"]
-                caption = entry["caption"]
-
-                for search_term in search_terms:
-                    if search_term in filename or search_term in caption:
-                        image_paths.append(entry["path"])
+                    try:
+                        does_match = search_query.does_entry_match_query(filename, caption, extension)
+                        if does_match:
+                            image_paths.append(entry["path"])
+                    except ValueError:
+                        show_error("Search query is incorrectly formatted")
                         break
 
         self.filtered_images = image_paths
