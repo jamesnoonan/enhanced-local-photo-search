@@ -1,6 +1,6 @@
 import shutil
 
-from PyQt6.QtWidgets import QWidget, QScrollArea, QVBoxLayout
+from PyQt6.QtWidgets import QWidget, QScrollArea, QVBoxLayout, QApplication
 
 from data.SearchQuery import SearchQuery
 from utils.ErrorUtils import show_error
@@ -109,19 +109,31 @@ class SearchView(QWidget):
         self.update_image_grid()
 
     def on_export(self):
+        progress = None
+
         try:
             export_folder_path = open_folder("Choose folder to copy to")
 
-            for image_path in self.filtered_images:
+            progress = show_progress_dialog("Copying images...", len(self.filtered_images))
+            for i, image_path in enumerate(self.filtered_images):
                 shutil.copy(image_path, export_folder_path)
+                progress.setValue(i + 1)
+                QApplication.processEvents()
+            progress.close()
 
             open_file(export_folder_path)
-        except FileNotFoundError:
-            show_error("The program could not find one or more images from the search results! You may be missing the original image")
         except AssertionError:
-            print("Operation cancelled")
+            print("Info: Export operation cancelled")
+        except FileNotFoundError:
+            print("Error: Could not find one or more images")
+            if progress is not None:
+                progress.close()
+            show_error("The program could not find one or more images from the search results! You may be missing the original image")
         except Exception as e:
-            show_error(f"Failed to copy images to folder ({e})")
+            if progress is not None:
+                progress.close()
+            print("Error: unexpected error:", e)
+            show_error(f"Failed to copy images to folder (image may already exist)")
 
     def resizeEvent(self, event):
         self.update_image_grid()
