@@ -2,20 +2,23 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QWidget, QGridLayout
 
-from utils.ImageUtils import open_file, get_thumbnail_path, page_size_limit, open_image
+from utils.ImageUtils import get_thumbnail_path, page_size_limit, open_image
 from widgets.ClickableLabel import ClickableLabel
 
-image_height = 100
-image_width = 150
 image_spacing = 10
 
+def get_image_height(width):
+    return int(2/3 * width)
+
 class ImageGrid(QWidget):
-    def __init__(self, root_dir, image_paths, page_index):
+    def __init__(self, root_dir, image_paths, page_index, parent_width):
         super().__init__()
+
+        self.images_per_row = 6
+        self.image_width = int((parent_width - 100) / self.images_per_row)
 
         self.root_dir = root_dir
         self.image_paths = image_paths
-        self.images_per_row = 6
         self.page_index = page_index
 
         self.image_widgets = []
@@ -43,14 +46,15 @@ class ImageGrid(QWidget):
             pixmap = QPixmap(thumbnail_path)
 
             # Scale to thumbnail
-            pixmap = pixmap.scaled(image_width, image_height, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            image_height = get_image_height(self.image_width)
+            pixmap = pixmap.scaled(self.image_width, image_height, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
 
             label = ClickableLabel()
             label.setPixmap(pixmap)
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             label.setStyleSheet("border: 1px solid #ccc; padding: 4px;")
 
-            label.setFixedSize(image_width, image_height)
+            label.setFixedSize(self.image_width, image_height)
 
             label.clicked.connect(lambda path=image_path: open_image(self.root_dir, path))
 

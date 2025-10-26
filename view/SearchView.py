@@ -65,7 +65,7 @@ class SearchView(QWidget):
         layout.addWidget(self.pagination_controls)
 
     def update_image_grid(self):
-        self.image_grid = ImageGrid(self.folder_path, self.filtered_images, self.page_index)
+        self.image_grid = ImageGrid(self.folder_path, self.filtered_images, self.page_index, self.width())
         self.scroll_area.setWidget(self.image_grid)
 
         self.update()
@@ -122,3 +122,7 @@ class SearchView(QWidget):
             print("Operation cancelled")
         except Exception as e:
             show_error(f"Failed to copy images to folder ({e})")
+
+    def resizeEvent(self, event):
+        self.update_image_grid()
+        super().resizeEvent(event)
