@@ -27,7 +27,10 @@ def index_images(folder_path):
     # Remove images that already appear in the list
     for i, entry in enumerate(image_data):
         stored_path = entry["path"]
-        thumbnail_paths.remove(get_thumbnail_path(folder_path, stored_path))
+        thumbnail_path = get_thumbnail_path(folder_path, stored_path)
+        
+        if thumbnail_path in thumbnail_paths:
+            thumbnail_paths.remove(thumbnail_path)
 
         progress.setValue(i + 1)
     progress.close()
