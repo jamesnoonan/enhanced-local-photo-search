@@ -27,10 +27,13 @@ def collect_images(directory_path):
                 image_list.append(full_path)
     return sorted(image_list, key=lambda path: os.path.basename(path).lower())
 
+def collect_thumbnails(directory_path):
+    return collect_images(os.path.join(directory_path, ".thumbnails"))
+
 def open_folder(text="Select Folder"):
     folder_path = QFileDialog.getExistingDirectory(None, text)
     if not folder_path:
-       raise FileNotFoundError("Folder not found")
+       raise AssertionError("Folder not found")
 
     return folder_path
 
@@ -65,6 +68,19 @@ def get_original_image_path(thumbnail_path):
         original_path = os.sep + original_path
 
     return original_path
+
+def open_image(root_dir, image_path):
+    if os.path.exists(image_path) and os.path.isfile(image_path):
+        open_file(image_path)
+        return
+
+    thumbnail_path = get_thumbnail_path(root_dir, image_path)
+    if thumbnail_path:
+        if os.path.exists(thumbnail_path) and os.path.isfile(thumbnail_path):
+            open_file(thumbnail_path)
+            return
+
+    show_error(f"Could not open {image_path} or its thumbnail.")
 
 
 def open_file(file_path):

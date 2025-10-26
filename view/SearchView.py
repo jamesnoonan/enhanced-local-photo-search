@@ -4,7 +4,8 @@ from PyQt6.QtWidgets import QWidget, QScrollArea, QVBoxLayout
 
 from data.SearchQuery import SearchQuery
 from utils.ErrorUtils import show_error
-from utils.ImageUtils import collect_images, page_size_limit, open_folder, open_file
+from utils.ImageUtils import collect_images, page_size_limit, open_folder, open_file, collect_thumbnails, \
+    get_original_image_path
 from utils.SearchUtils import index_images
 from widgets.ImageGrid import ImageGrid
 from widgets.Pagination import PaginationControls
@@ -33,6 +34,10 @@ class SearchView(QWidget):
     def init_ui(self):
         top_row = SearchBar(self.on_search, self.on_export, self.folder_path)
         self.images = collect_images(self.folder_path)
+        if len(self.images) == 0: # Fallback to showing thumbnails
+            thumbnails = collect_thumbnails(self.folder_path)
+            self.images = [get_original_image_path(thumbnail) for thumbnail in thumbnails]
+
         self.filtered_images = self.images
 
         self.scroll_area = QScrollArea()
@@ -112,6 +117,8 @@ class SearchView(QWidget):
 
             open_file(export_folder_path)
         except FileNotFoundError:
+            show_error("The program could not find one or more images from the search results! You may be missing the original image")
+        except AssertionError:
             print("Operation cancelled")
         except Exception as e:
             show_error(f"Failed to copy images to folder ({e})")

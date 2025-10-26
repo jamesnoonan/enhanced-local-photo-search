@@ -18,7 +18,6 @@ class MainWindow(QMainWindow):
 
     def init_ui(self):
         self.setWindowTitle("Enhanced Local Photo Search")
-        # self.setGeometry(100, 100, 1000, 650)
         self.setFixedSize(1000, 700)
 
         self.stack.addWidget(self.initial_view)
