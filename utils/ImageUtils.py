@@ -24,7 +24,7 @@ def collect_images(directory_path):
         for file in files:
             if is_image_file(file):
                 full_path = os.path.join(root, file)
-                image_list.append(full_path)
+                image_list.append(os.path.normpath(full_path))
     return sorted(image_list, key=lambda path: os.path.basename(path).lower())
 
 def collect_thumbnails(directory_path):
@@ -67,7 +67,7 @@ def get_original_image_path(thumbnail_path):
     if is_absolute and not original_path.startswith(os.sep):
         original_path = os.sep + original_path
 
-    return original_path
+    return os.path.normpath(original_path)
 
 def open_image(root_dir, image_path):
     if os.path.exists(image_path) and os.path.isfile(image_path):
