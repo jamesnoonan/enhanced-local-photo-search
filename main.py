@@ -1,5 +1,6 @@
 import sys
 
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
 
 from utils.ImageUtils import create_thumbnails
@@ -18,7 +19,9 @@ class MainWindow(QMainWindow):
 
     def init_ui(self):
         self.setWindowTitle("Enhanced Local Photo Search")
-        self.setFixedSize(1000, 700)
+        self.resize(1000, 700)
+        self.setMinimumWidth(800)
+        self.setMinimumHeight(400)
 
         self.stack.addWidget(self.initial_view)
         self.setCentralWidget(self.stack)
@@ -34,6 +37,8 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication([])
+    app.setWindowIcon(QIcon("icon.png"))
+
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
