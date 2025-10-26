@@ -8,7 +8,10 @@ from utils.ImageUtils import collect_images, page_size_limit, open_folder, open_
 from utils.SearchUtils import index_images
 from widgets.ImageGrid import ImageGrid
 from widgets.Pagination import PaginationControls
+from widgets.ProgressDialog import show_progress_dialog
 from widgets.SearchBar import SearchBar
+
+show_progress_limit = 100
 
 class SearchView(QWidget):
     def __init__(self, folder_path):
@@ -73,7 +76,11 @@ class SearchView(QWidget):
             if len(search_query.query_terms) == 0:
                 image_paths = list(map(lambda image: image["path"], self.index))
             else:
-                for entry in self.index:
+                progress = None
+                if len(self.index) > show_progress_limit:
+                    progress = show_progress_dialog("Searching images...", len(self.index))
+
+                for i, entry in enumerate(self.index):
                     filename = entry["filename"]
                     caption = entry["caption"]
                     extension = "."  + (entry["path"].split(".")[-1]).lower()
@@ -85,6 +92,12 @@ class SearchView(QWidget):
                     except ValueError:
                         show_error("Search query is incorrectly formatted")
                         break
+
+                    if progress is not None:
+                        progress.setValue(i + 1)
+
+                if progress is not None:
+                    progress.close()
 
         self.filtered_images = image_paths
         self.init_pagination()
