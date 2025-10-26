@@ -9,7 +9,7 @@ from utils.SearchUtils import index_images
 from widgets.ImageGrid import ImageGrid
 from widgets.Pagination import PaginationControls
 from widgets.ProgressDialog import show_progress_dialog
-from widgets.SearchBar import SearchBar
+from widgets.SearchBar import SearchBar, file_filter_all_value
 
 show_progress_limit = 100
 
@@ -73,7 +73,7 @@ class SearchView(QWidget):
         image_paths = []
 
         if search_query.search_filenames or search_query.search_ai_data:
-            if len(search_query.query_terms) == 0:
+            if len(search_query.query_terms) == 0 and search_query.file_type_filter == file_filter_all_value:
                 image_paths = list(map(lambda image: image["path"], self.index))
             else:
                 progress = None
