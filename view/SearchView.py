@@ -57,7 +57,7 @@ class SearchView(QWidget):
         layout.addWidget(self.pagination_controls)
 
     def update_image_grid(self):
-        self.image_grid = ImageGrid(self.folder_path, self.images, self.page_index)
+        self.image_grid = ImageGrid(self.folder_path, self.filtered_images, self.page_index)
         self.scroll_area.setWidget(self.image_grid)
 
         self.update()
@@ -88,9 +88,7 @@ class SearchView(QWidget):
 
         self.filtered_images = image_paths
         self.init_pagination()
-
-        self.image_grid = ImageGrid(self.folder_path, image_paths, self.page_index)
-        self.scroll_area.setWidget(self.image_grid)
+        self.update_image_grid()
 
     def on_export(self):
         try:
