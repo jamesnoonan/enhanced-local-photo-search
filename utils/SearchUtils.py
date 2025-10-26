@@ -6,7 +6,7 @@ import sys
 
 from PyQt6.QtWidgets import QMessageBox
 
-from utils.ImageCaptioning import ImageCaptioner
+from utils.ImageCaptioner import ImageCaptioner
 from utils.ImageUtils import collect_images, thumbnail_dir_name, get_original_image_path, get_thumbnail_path
 from widgets.ProgressDialog import show_progress_dialog
 
