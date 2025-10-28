@@ -6,6 +6,12 @@ A simple desktop application to search photos in a folder, using both the filena
 
 ![Search View Screenshot](docs/search_view.png)
 
+## Building the Executable
+
+Ensure you have PyInstaller on your system (`pip install -U pyinstaller`) and then run the build script (`python build.py`) to generate an executable in the `dist/` folder.
+
+## Basic Usage
+
 ### Cached Data
 
 When a folder is opened with the program for the first time, the program will generate thumbnails and search index. These are cached under `.thumbnails/` and `.search-index` respectively. New photos will be added to the cache when the program opens the folder. If you no longer want the cache, clicking `Clear cache and exit` will delete the cache for the current folder.
@@ -27,7 +33,7 @@ Choose an image file type from the dropdown to filter the results to that type (
 The search field allows for Boolean operations (`AND` and `OR`) with the query.
 
 - Defaults to an `AND` operation (e.g. `horse parade` evaluates as `horse AND parade`)
-- Operations are case-sensitive (e.g. `horse and parade` evaluate as `horse AND and AND parade`)
+- Operations are case-sensitive (e.g. `horse and parade` evaluates as `horse AND and AND parade`)
 - Right associative (e.g. `train OR horse AND building` evaluates as `train OR (horse AND building)`)
 - Applies parentheses (e.g. `(train OR horse) AND building` will evaluate the `OR` first)
 - Short circuit evaluation (e.g. `train OR (horse AND building)` will not evaluate the second half of the expression if there is a match on `train`)
