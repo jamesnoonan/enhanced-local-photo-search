@@ -4,8 +4,8 @@ from PyQt6.QtWidgets import QWidget, QScrollArea, QVBoxLayout, QApplication
 
 from data.SearchQuery import SearchQuery
 from utils.ErrorUtils import show_error
-from utils.ImageUtils import collect_images, page_size_limit, open_folder, open_file, collect_thumbnails, \
-    get_original_image_path
+from utils.ImageUtils import collect_images, page_size_limit, open_folder, open_file, collect_thumbnails
+from utils.PathUtils import get_original_image_path
 from utils.SearchUtils import index_images
 from widgets.ImageGrid import ImageGrid
 from widgets.Pagination import PaginationControls

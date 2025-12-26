@@ -3,6 +3,7 @@ import sys
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
 
+from utils.ErrorUtils import show_error
 from utils.ImageUtils import create_thumbnails
 from view.InitialView import InitialView
 from view.SearchView import SearchView
@@ -27,13 +28,19 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.stack)
 
     def open_folder(self, folder_path):
-        create_thumbnails(folder_path)
+        try:
+            create_thumbnails(folder_path)
 
-        if not self.search_view:
-            self.search_view = SearchView(folder_path)
-            self.stack.addWidget(self.search_view)
+            if not self.search_view:
+                self.search_view = SearchView(folder_path)
+                self.stack.addWidget(self.search_view)
 
-        self.stack.setCurrentWidget(self.search_view)
+            self.stack.setCurrentWidget(self.search_view)
+
+        except Exception as error:
+            print(error)
+            show_error("An error occurred: " + str(error))
+            sys.exit(1)
 
 if __name__ == "__main__":
     app = QApplication([])

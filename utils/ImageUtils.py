@@ -6,6 +6,7 @@ from PIL import Image
 from PyQt6.QtWidgets import QFileDialog
 
 from utils.ErrorUtils import show_error
+from utils.PathUtils import get_thumbnail_path
 from widgets.ProgressDialog import show_progress_dialog
 
 page_size_limit = 120
@@ -28,7 +29,7 @@ def collect_images(directory_path):
     return sorted(image_list, key=lambda path: os.path.basename(path).lower())
 
 def collect_thumbnails(directory_path):
-    return collect_images(os.path.join(directory_path, ".thumbnails"))
+    return collect_images(os.path.join(directory_path, thumbnail_dir_name))
 
 def open_folder(text="Select Folder"):
     folder_path = QFileDialog.getExistingDirectory(None, text)
@@ -37,37 +38,6 @@ def open_folder(text="Select Folder"):
 
     return folder_path
 
-def get_original_image_path(thumbnail_path):
-    parts = thumbnail_path.split(os.sep)
-
-    # Keep track if path was absolute
-    is_absolute = thumbnail_path.startswith(os.sep)
-
-    # Remove the first occurrence of ".thumbnails"
-    try:
-        thumb_index = parts.index(".thumbnails")
-    except ValueError:
-        raise ValueError(f"Expected '.thumbnails' directory in path: {thumbnail_path}")
-
-    # Rebuild path without the ".thumbnails" directory
-    original_parts = parts[:thumb_index] + parts[thumb_index + 1:]
-    original_dir, thumb_filename = os.path.split(os.path.join(*original_parts))
-
-    # Extract original filename
-    name, _ = os.path.splitext(thumb_filename)
-    if "_" not in name:
-        raise ValueError(f"Thumbnail filename does not follow expected format: {thumb_filename}")
-
-    base_name, orig_ext = name.rsplit("_", 1)
-    original_filename = f"{base_name}.{orig_ext}"
-
-    original_path = os.path.join(original_dir, original_filename)
-
-    # Prepend leading slash if the original thumbnail path was absolute
-    if is_absolute and not original_path.startswith(os.sep):
-        original_path = os.sep + original_path
-
-    return os.path.normpath(original_path)
 
 def open_image(root_dir, image_path):
     if os.path.exists(image_path) and os.path.isfile(image_path):
@@ -95,27 +65,6 @@ def open_file(file_path):
         show_error(f"Error: Image file not found at '{file_path}'.")
     except Exception as e:
         show_error(f"An error occurred: {e}")
-
-def get_thumbnail_path(root_path, img_path):
-    """
-    Return the thumbnail path under root_path/.thumbnails, preserving subfolders.
-    Works with absolute or relative img_path.
-    """
-    # Make image path relative to root_path
-    rel_path = os.path.relpath(img_path, root_path)  # e.g., "EHS-0016 ... .tif"
-    dirpath, filename = os.path.split(rel_path)
-    name, ext = os.path.splitext(filename)
-    ext_clean = ext.lower().lstrip('.')  # "tif"
-
-    # Thumbnail directory inside root_path/.thumbnails, preserving subfolders
-    thumb_dir = os.path.join(root_path, ".thumbnails", dirpath)
-
-    # Thumbnail filename
-    thumb_filename = f"{name}_{ext_clean}.jpg"
-
-    # Full thumbnail path
-    thumb_path = os.path.join(thumb_dir, thumb_filename)
-    return os.path.normpath(thumb_path)
 
 def create_thumbnails(root_dir, thumbnail_size=(256, 256)):
     all_images = collect_images(root_dir)

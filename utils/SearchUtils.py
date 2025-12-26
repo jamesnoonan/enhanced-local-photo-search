@@ -7,7 +7,8 @@ import sys
 from PyQt6.QtWidgets import QMessageBox
 
 from utils.ImageCaptioner import ImageCaptioner
-from utils.ImageUtils import collect_images, thumbnail_dir_name, get_original_image_path, get_thumbnail_path
+from utils.ImageUtils import collect_images, thumbnail_dir_name, get_thumbnail_path
+from utils.PathUtils import get_original_image_path
 from widgets.ProgressDialog import show_progress_dialog
 
 index_filename = ".search-index"
@@ -26,7 +27,7 @@ def index_images(folder_path):
     progress = show_progress_dialog("Loading search index...", len(image_data))
     # Remove images that already appear in the list
     for i, entry in enumerate(image_data):
-        stored_path = entry["path"]
+        stored_path = os.path.join(folder_path, entry["path"])
         thumbnail_path = get_thumbnail_path(folder_path, stored_path)
 
         if thumbnail_path in thumbnail_paths:
@@ -37,7 +38,7 @@ def index_images(folder_path):
 
     # Exit early if no new files
     if len(thumbnail_paths) == 0:
-        return image_data
+        return convert_index_to_absolute(folder_path, image_data)
 
     image_captioner = ImageCaptioner()
 
@@ -47,16 +48,27 @@ def index_images(folder_path):
 
         filename = os.path.basename(image_path)
         caption = image_captioner.caption(image_path)
-        image_data.append({ "path": get_original_image_path(image_path), "filename": filename.lower(), "caption": caption.lower()  })
+        absolute_path = get_original_image_path(image_path)
+        relative_path = os.path.relpath(absolute_path, start=folder_path)
+        image_data.append({ "path": relative_path, "filename": filename.lower(), "caption": caption.lower()  })
 
         progress.setValue(i+1)
 
+    # Write results to index file
     with open(file_path, "w") as index_file:
         json.dump(image_data, index_file)
 
     progress.close()
-    return image_data
+    return convert_index_to_absolute(folder_path, image_data)
 
+def convert_index_to_absolute(folder_path, image_data):
+    output = []
+
+    for entry in image_data:
+        absolute_path = os.path.join(folder_path, entry["path"])
+        output.append({ "path": absolute_path, "filename": entry["filename"], "caption": entry["caption"] })
+
+    return output
 
 def load_index(root_dir):
     file_path = os.path.join(root_dir, index_filename)
