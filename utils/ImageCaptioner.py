@@ -1,17 +1,43 @@
-from transformers import pipeline
+from PIL import Image
+import torch
+from transformers import (
+    VisionEncoderDecoderModel,
+    ViTImageProcessor, AutoTokenizer,
+)
 from widgets.ProgressDialog import show_progress_dialog
-
 
 class ImageCaptioner:
     def __init__(self):
-        progress = show_progress_dialog("Loading model... (This may take a couple minutes)", 1)
-        self.model = pipeline("image-to-text", model="nlpconnect/vit-gpt2-image-captioning")
+        progress = show_progress_dialog(
+            "Loading model... (This may take a couple minutes)", 1
+        )
+
+        model_name = "nlpconnect/vit-gpt2-image-captioning"
+
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+
+        self.model = VisionEncoderDecoderModel.from_pretrained(model_name).to(self.device)
+        self.processor = ViTImageProcessor.from_pretrained(model_name)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+
         progress.setValue(1)
         progress.close()
 
     def caption(self, image_path):
-        response = self.model(image_path)
+        image = Image.open(image_path).convert("RGB")
 
-        if len(response) != 0:
-            return response[0]["generated_text"]
-        return ""
+        pixel_values = self.processor(
+            images=image,
+            return_tensors="pt"
+        ).pixel_values.to(self.device)
+
+        output_ids = self.model.generate(
+            pixel_values,
+            max_length=32,
+            num_beams=4
+        )
+
+        return self.tokenizer.decode(
+            output_ids[0],
+            skip_special_tokens=True
+        ).strip()
