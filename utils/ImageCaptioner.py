@@ -1,9 +1,3 @@
-from PIL import Image
-import torch
-from transformers import (
-    VisionEncoderDecoderModel,
-    ViTImageProcessor, AutoTokenizer,
-)
 from widgets.ProgressDialog import show_progress_dialog
 
 class ImageCaptioner:
@@ -11,6 +5,17 @@ class ImageCaptioner:
         progress = show_progress_dialog(
             "Loading model... (This may take a couple minutes)", 1
         )
+
+        # Load imports on init
+        from PIL import Image
+        import torch
+        from transformers import (
+            VisionEncoderDecoderModel,
+            ViTImageProcessor, AutoTokenizer,
+        )
+
+        # Save references to use in other methods
+        self.Image = Image
 
         model_name = "nlpconnect/vit-gpt2-image-captioning"
 
@@ -24,7 +29,7 @@ class ImageCaptioner:
         progress.close()
 
     def caption(self, image_path):
-        image = Image.open(image_path).convert("RGB")
+        image = self.Image.open(image_path).convert("RGB")
 
         pixel_values = self.processor(
             images=image,
