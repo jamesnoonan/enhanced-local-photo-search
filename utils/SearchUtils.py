@@ -31,7 +31,7 @@ def index_images(folder_path, quick_load: bool):
     thumbnail_folder_path = os.path.join(folder_path, thumbnail_dir_name)
     thumbnail_paths = collect_images(thumbnail_folder_path)
 
-    progress = show_progress_dialog("Loading search index...", len(image_data))
+    # progress = show_progress_dialog("Loading search index...", len(image_data))
     # Remove images that already appear in the list
     for i, entry in enumerate(image_data):
         stored_path = os.path.join(folder_path, entry["path"])
@@ -40,8 +40,9 @@ def index_images(folder_path, quick_load: bool):
         if thumbnail_path in thumbnail_paths:
             thumbnail_paths.remove(thumbnail_path)
 
-        progress.setValue(i + 1)
-    progress.close()
+        # progress.setValue(i + 1)
+        print(f"{i+1} of {len(thumbnail_paths)} {stored_path}")
+    # progress.close()
 
     # Exit early if no new files
     if len(thumbnail_paths) == 0:
@@ -49,7 +50,7 @@ def index_images(folder_path, quick_load: bool):
 
     image_captioner = ImageCaptioner()
 
-    progress = show_progress_dialog("Creating search index...", len(thumbnail_paths))
+    # progress = show_progress_dialog("Creating search index...", len(thumbnail_paths))
     for i, image_path in enumerate(thumbnail_paths):
         print(f"{i+1} of {len(thumbnail_paths)} {image_path}")
 
@@ -59,13 +60,13 @@ def index_images(folder_path, quick_load: bool):
         relative_path = os.path.relpath(absolute_path, start=folder_path)
         image_data.append({ "path": relative_path, "filename": filename.lower(), "caption": caption.lower()  })
 
-        progress.setValue(i+1)
+        # progress.setValue(i+1)
 
     # Write results to index file
     with open(file_path, "w") as index_file:
         json.dump(image_data, index_file)
 
-    progress.close()
+    # progress.close()
     return convert_index_to_absolute(folder_path, image_data)
 
 def convert_index_to_absolute(folder_path, image_data):

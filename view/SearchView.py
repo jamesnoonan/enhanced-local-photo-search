@@ -1,5 +1,6 @@
 import shutil
 
+from PyQt6.QtCore import QObject, pyqtSignal, QThread
 from PyQt6.QtWidgets import QWidget, QScrollArea, QVBoxLayout, QApplication
 
 from data.SearchQuery import SearchQuery
@@ -14,6 +15,18 @@ from widgets.SearchBar import SearchBar, file_filter_all_value
 
 show_progress_limit = 100
 
+class IndexWorker(QObject):
+    finished = pyqtSignal(object)
+
+    def __init__(self, folder_path, quick_load):
+        super().__init__()
+        self.folder_path = folder_path
+        self.quick_load = quick_load
+
+    def run(self):
+        index = index_images(self.folder_path, self.quick_load)
+        self.finished.emit(index)
+
 class SearchView(QWidget):
     def __init__(self, folder_path, quick_load: bool):
         super().__init__()
@@ -23,13 +36,32 @@ class SearchView(QWidget):
         self.pagination_controls = None
 
         self.folder_path = folder_path
-        self.index = index_images(folder_path, quick_load)
+        # self.index = index_images(folder_path, quick_load)
+        self.index = None
+
+        self.thread = QThread(self)
+        self.worker = IndexWorker(folder_path, quick_load)
+
+        self.worker.moveToThread(self.thread)
+
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.on_index_ready)
+
+        # Cleanup
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+
+        self.thread.start()
 
         self.images = []
         self.filtered_images = []
         self.page_index = 0
 
         self.init_ui()
+
+    def on_index_ready(self, index):
+        self.index = index
 
     def init_ui(self):
         top_row = SearchBar(self.on_search, self.on_export, self.folder_path)
@@ -76,6 +108,10 @@ class SearchView(QWidget):
 
     def on_search(self, search_query: SearchQuery):
         image_paths = []
+
+        if self.index is None:
+            show_error("Please wait until the index finishes processing")
+            return
 
         if search_query.search_filenames or search_query.search_ai_data:
             if len(search_query.query_terms) == 0 and search_query.file_type_filter == file_filter_all_value:

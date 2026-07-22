@@ -2,10 +2,6 @@ from widgets.ProgressDialog import show_progress_dialog
 
 class ImageCaptioner:
     def __init__(self):
-        progress = show_progress_dialog(
-            "Loading model... (This may take a couple minutes)", 1
-        )
-
         # Load imports on init
         from PIL import Image
         import torch
@@ -24,9 +20,6 @@ class ImageCaptioner:
         self.model = VisionEncoderDecoderModel.from_pretrained(model_name).to(self.device)
         self.processor = ViTImageProcessor.from_pretrained(model_name)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-
-        progress.setValue(1)
-        progress.close()
 
     def caption(self, image_path):
         image = self.Image.open(image_path).convert("RGB")
