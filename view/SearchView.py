@@ -15,7 +15,7 @@ from widgets.SearchBar import SearchBar, file_filter_all_value
 show_progress_limit = 100
 
 class SearchView(QWidget):
-    def __init__(self, folder_path):
+    def __init__(self, folder_path, quick_load: bool):
         super().__init__()
 
         self.scroll_area = None
@@ -23,7 +23,7 @@ class SearchView(QWidget):
         self.pagination_controls = None
 
         self.folder_path = folder_path
-        self.index = index_images(folder_path)
+        self.index = index_images(folder_path, quick_load)
 
         self.images = []
         self.filtered_images = []

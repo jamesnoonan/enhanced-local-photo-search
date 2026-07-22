@@ -7,19 +7,26 @@ import sys
 from PyQt6.QtWidgets import QMessageBox
 
 from utils.ImageCaptioner import ImageCaptioner
-from utils.ImageUtils import collect_images, thumbnail_dir_name, get_thumbnail_path
+from utils.ImageUtils import collect_images, thumbnail_dir_name, get_thumbnail_path, create_thumbnails
 from utils.PathUtils import get_original_image_path
 from widgets.ProgressDialog import show_progress_dialog
 
 index_filename = ".search-index"
 
-def index_images(folder_path):
+def index_images(folder_path, quick_load: bool):
     image_data = []
 
     file_path = os.path.join(folder_path, index_filename)
     if os.path.exists(file_path):
         with open(file_path, "r") as index_file:
             image_data = json.load(index_file)
+            if quick_load:
+                return convert_index_to_absolute(folder_path, image_data)
+
+    if quick_load:
+        # Missing index, so we will probably need to create thumbnails
+        # and index from the start
+        create_thumbnails(folder_path)
 
     thumbnail_folder_path = os.path.join(folder_path, thumbnail_dir_name)
     thumbnail_paths = collect_images(thumbnail_folder_path)

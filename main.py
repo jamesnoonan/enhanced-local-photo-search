@@ -27,12 +27,13 @@ class MainWindow(QMainWindow):
         self.stack.addWidget(self.initial_view)
         self.setCentralWidget(self.stack)
 
-    def open_folder(self, folder_path):
+    def open_folder(self, folder_path, quick_load: bool):
         try:
-            create_thumbnails(folder_path)
+            if not quick_load:
+                create_thumbnails(folder_path)
 
             if not self.search_view:
-                self.search_view = SearchView(folder_path)
+                self.search_view = SearchView(folder_path, quick_load)
                 self.stack.addWidget(self.search_view)
 
             self.stack.setCurrentWidget(self.search_view)
