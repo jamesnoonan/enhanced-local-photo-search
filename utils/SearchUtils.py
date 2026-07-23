@@ -9,11 +9,10 @@ from PyQt6.QtWidgets import QMessageBox
 from utils.ImageCaptioner import ImageCaptioner
 from utils.ImageUtils import collect_images, thumbnail_dir_name, get_thumbnail_path, create_thumbnails
 from utils.PathUtils import get_original_image_path
-from widgets.ProgressDialog import show_progress_dialog
 
 index_filename = ".search-index"
 
-def index_images(folder_path, quick_load: bool):
+def index_images(folder_path, quick_load: bool, progress_callback):
     image_data = []
 
     file_path = os.path.join(folder_path, index_filename)
@@ -26,12 +25,11 @@ def index_images(folder_path, quick_load: bool):
     if quick_load:
         # Missing index, so we will probably need to create thumbnails
         # and index from the start
-        create_thumbnails(folder_path)
+        create_thumbnails(folder_path, print)
 
     thumbnail_folder_path = os.path.join(folder_path, thumbnail_dir_name)
     thumbnail_paths = collect_images(thumbnail_folder_path)
 
-    # progress = show_progress_dialog("Loading search index...", len(image_data))
     # Remove images that already appear in the list
     for i, entry in enumerate(image_data):
         stored_path = os.path.join(folder_path, entry["path"])
@@ -40,17 +38,15 @@ def index_images(folder_path, quick_load: bool):
         if thumbnail_path in thumbnail_paths:
             thumbnail_paths.remove(thumbnail_path)
 
-        # progress.setValue(i + 1)
-        print(f"{i+1} of {len(thumbnail_paths)} {stored_path}")
-    # progress.close()
 
     # Exit early if no new files
     if len(thumbnail_paths) == 0:
         return convert_index_to_absolute(folder_path, image_data)
 
     image_captioner = ImageCaptioner()
+    total_to_index = len(thumbnail_paths)
+    progress_callback(0, total_to_index)
 
-    # progress = show_progress_dialog("Creating search index...", len(thumbnail_paths))
     for i, image_path in enumerate(thumbnail_paths):
         print(f"{i+1} of {len(thumbnail_paths)} {image_path}")
 
@@ -60,13 +56,12 @@ def index_images(folder_path, quick_load: bool):
         relative_path = os.path.relpath(absolute_path, start=folder_path)
         image_data.append({ "path": relative_path, "filename": filename.lower(), "caption": caption.lower()  })
 
-        # progress.setValue(i+1)
+        progress_callback(i+1, total_to_index)
 
     # Write results to index file
     with open(file_path, "w") as index_file:
         json.dump(image_data, index_file)
 
-    # progress.close()
     return convert_index_to_absolute(folder_path, image_data)
 
 def convert_index_to_absolute(folder_path, image_data):

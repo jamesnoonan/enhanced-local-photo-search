@@ -45,7 +45,7 @@ class InitialView(QWidget):
     def init_indexing_ui(self):
         clear_layout(self.column)
 
-        self.column.addWidget(QLabel("<h3>Loading folder...</h3>"), alignment=Qt.AlignmentFlag.AlignHCenter)
+        self.column.addWidget(QLabel("<h3>Creating thumbnails...</h3>"), alignment=Qt.AlignmentFlag.AlignHCenter)
         self.column.addWidget(QLabel("Please wait"), alignment=Qt.AlignmentFlag.AlignHCenter)
 
         self.column.addSpacing(10)

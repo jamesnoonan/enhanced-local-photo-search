@@ -66,22 +66,17 @@ def open_file(file_path):
     except Exception as e:
         show_error(f"An error occurred: {e}")
 
-def create_thumbnails(root_dir, thumbnail_size=(256, 256)):
+def create_thumbnails(root_dir, progress_callback, thumbnail_size=(256, 256)):
     all_images = collect_images(root_dir)
-
-    progress = show_progress_dialog("Creating thumbnails...", len(all_images))
+    image_count = len(all_images)
 
     thumb_dir = os.path.join(root_dir, ".thumbnails")
     os.makedirs(thumb_dir, exist_ok=True)
 
     for img_index, img_path in enumerate(all_images):
-        if progress.wasCanceled():
-            print("Thumbnail creation canceled by user")
-            break
-
         thumb_path = get_thumbnail_path(root_dir, img_path)
         if os.path.exists(thumb_path):
-            progress.setValue(img_index + 1)
+            progress_callback(img_index + 1, image_count)
             continue  # Skip if thumbnail already exists
 
         os.makedirs(os.path.dirname(thumb_path), exist_ok=True)
@@ -101,6 +96,4 @@ def create_thumbnails(root_dir, thumbnail_size=(256, 256)):
         except Exception as e:
             print(f"Failed to create thumbnail for {img_path}: {e}")
 
-        progress.setValue(img_index + 1)
-
-    progress.close()
+        progress_callback(img_index + 1, image_count)

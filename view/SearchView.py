@@ -1,31 +1,18 @@
 import shutil
 
-from PyQt6.QtCore import QObject, pyqtSignal, QThread
-from PyQt6.QtWidgets import QWidget, QScrollArea, QVBoxLayout, QApplication
+from PyQt6.QtWidgets import QWidget, QScrollArea, QVBoxLayout, QApplication, QProgressBar, QLabel
 
 from data.SearchQuery import SearchQuery
 from utils.ErrorUtils import show_error
 from utils.ImageUtils import collect_images, page_size_limit, open_folder, open_file, collect_thumbnails
+from utils.IndexWorker import IndexWorker, run_index_worker, IndexProgress
 from utils.PathUtils import get_original_image_path
-from utils.SearchUtils import index_images
 from widgets.ImageGrid import ImageGrid
 from widgets.Pagination import PaginationControls
 from widgets.ProgressDialog import show_progress_dialog
 from widgets.SearchBar import SearchBar, file_filter_all_value
 
 show_progress_limit = 100
-
-class IndexWorker(QObject):
-    finished = pyqtSignal(object)
-
-    def __init__(self, folder_path, quick_load):
-        super().__init__()
-        self.folder_path = folder_path
-        self.quick_load = quick_load
-
-    def run(self):
-        index = index_images(self.folder_path, self.quick_load)
-        self.finished.emit(index)
 
 class SearchView(QWidget):
     def __init__(self, folder_path, quick_load: bool):
@@ -36,23 +23,13 @@ class SearchView(QWidget):
         self.pagination_controls = None
 
         self.folder_path = folder_path
-        # self.index = index_images(folder_path, quick_load)
         self.index = None
 
-        self.thread = QThread(self)
-        self.worker = IndexWorker(folder_path, quick_load)
+        self.window_layout = QVBoxLayout()
+        self.progress_label = QLabel("<h3>Loading model...</h3>")
+        self.progress_bar = QProgressBar(self)
 
-        self.worker.moveToThread(self.thread)
-
-        self.thread.started.connect(self.worker.run)
-        self.worker.finished.connect(self.on_index_ready)
-
-        # Cleanup
-        self.worker.finished.connect(self.thread.quit)
-        self.worker.finished.connect(self.worker.deleteLater)
-        self.thread.finished.connect(self.thread.deleteLater)
-
-        self.thread.start()
+        run_index_worker(folder_path, quick_load, self, self.on_index_progress, self.on_index_finish)
 
         self.images = []
         self.filtered_images = []
@@ -60,11 +37,25 @@ class SearchView(QWidget):
 
         self.init_ui()
 
-    def on_index_ready(self, index):
+    def on_index_progress(self, progress):
+        if progress.progress > 0:
+            self.progress_label.setText("<h3>Indexing results...</h3>")
+        self.progress_bar.setRange(0, progress.total)
+        self.progress_bar.setValue(progress.progress)
+
+    def on_index_finish(self, index):
+        self.window_layout.removeWidget(self.progress_bar)
+        self.progress_bar.deleteLater()
+
+        self.window_layout.removeWidget(self.progress_label)
+        self.progress_label.deleteLater()
+
+        top_row = SearchBar(self.on_search, self.on_export, self.folder_path)
+        self.window_layout.insertWidget(0, top_row)
+
         self.index = index
 
     def init_ui(self):
-        top_row = SearchBar(self.on_search, self.on_export, self.folder_path)
         self.images = collect_images(self.folder_path)
         if len(self.images) == 0: # Fallback to showing thumbnails
             thumbnails = collect_thumbnails(self.folder_path)
@@ -75,16 +66,16 @@ class SearchView(QWidget):
         self.scroll_area = QScrollArea()
         self.update_image_grid()
 
-        window_layout = QVBoxLayout()
-        window_layout.setSpacing(0)
-        window_layout.addWidget(top_row)
-        window_layout.addWidget(self.scroll_area)
+        self.window_layout.setSpacing(0)
+        self.window_layout.addWidget(self.progress_label)
+        self.window_layout.addWidget(self.progress_bar)
+        self.window_layout.addWidget(self.scroll_area)
 
-        self.setLayout(window_layout)
+        self.setLayout(self.window_layout)
         self.init_pagination()
 
     def init_pagination(self):
-        layout = self.layout()
+        layout = self.window_layout
         if self.pagination_controls is not None:
             layout.removeWidget(self.pagination_controls)
 
