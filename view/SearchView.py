@@ -1,14 +1,15 @@
 import shutil
 
-from PyQt6.QtWidgets import QWidget, QScrollArea, QVBoxLayout, QApplication, QProgressBar, QLabel
+from PyQt6.QtWidgets import QWidget, QScrollArea, QVBoxLayout, QApplication
 
 from data.SearchQuery import SearchQuery
 from utils.ErrorUtils import show_error
 from utils.ImageUtils import collect_images, page_size_limit, open_folder, open_file, collect_thumbnails
-from utils.IndexWorker import IndexWorker, run_index_worker, IndexProgress
+from utils.IndexWorker import run_index_worker
 from utils.PathUtils import get_original_image_path
 from widgets.ImageGrid import ImageGrid
 from widgets.Pagination import PaginationControls
+from widgets.ProgressBar import ProgressBar
 from widgets.ProgressDialog import show_progress_dialog
 from widgets.SearchBar import SearchBar, file_filter_all_value
 
@@ -26,8 +27,7 @@ class SearchView(QWidget):
         self.index = None
 
         self.window_layout = QVBoxLayout()
-        self.progress_label = QLabel("<h3>Loading model...</h3>")
-        self.progress_bar = QProgressBar(self)
+        self.progress_bar = ProgressBar("Processing search results", "Loading model...")
 
         run_index_worker(folder_path, quick_load, self, self.on_index_progress, self.on_index_finish)
 
@@ -39,16 +39,12 @@ class SearchView(QWidget):
 
     def on_index_progress(self, progress):
         if progress.progress > 0:
-            self.progress_label.setText("<h3>Indexing results...</h3>")
-        self.progress_bar.setRange(0, progress.total)
-        self.progress_bar.setValue(progress.progress)
+            self.progress_bar.set_subtitle("Indexing results...")
+        self.progress_bar.set_progress(progress.progress, progress.total)
 
     def on_index_finish(self, index):
         self.window_layout.removeWidget(self.progress_bar)
         self.progress_bar.deleteLater()
-
-        self.window_layout.removeWidget(self.progress_label)
-        self.progress_label.deleteLater()
 
         top_row = SearchBar(self.on_search, self.on_export, self.folder_path)
         self.window_layout.insertWidget(0, top_row)
@@ -67,7 +63,6 @@ class SearchView(QWidget):
         self.update_image_grid()
 
         self.window_layout.setSpacing(0)
-        self.window_layout.addWidget(self.progress_label)
         self.window_layout.addWidget(self.progress_bar)
         self.window_layout.addWidget(self.scroll_area)
 
