@@ -7,6 +7,7 @@ from utils.ErrorUtils import show_error
 from utils.ImageUtils import collect_images, page_size_limit, open_folder, open_file, collect_thumbnails
 from utils.IndexWorker import run_index_worker
 from utils.PathUtils import get_original_image_path
+from utils.SearchUtils import does_search_index_exist
 from widgets.ImageGrid import ImageGrid
 from widgets.Pagination import PaginationControls
 from widgets.ProgressBar import ProgressBar
@@ -18,6 +19,8 @@ show_progress_limit = 100
 class SearchView(QWidget):
     def __init__(self, folder_path, quick_load: bool):
         super().__init__()
+
+        self.quick_load = quick_load
 
         self.scroll_area = None
         self.image_grid = None
@@ -38,18 +41,20 @@ class SearchView(QWidget):
         self.init_ui()
 
     def on_index_progress(self, progress):
-        if progress.progress > 0:
-            self.progress_bar.set_subtitle("Indexing results...")
+        self.progress_bar.set_subtitle("Indexing results...")
         self.progress_bar.set_progress(progress.progress, progress.total)
 
     def on_index_finish(self, index):
+        self.index = index
+
         self.window_layout.removeWidget(self.progress_bar)
         self.progress_bar.deleteLater()
 
         top_row = SearchBar(self.on_search, self.on_export, self.folder_path)
-        self.window_layout.insertWidget(0, top_row)
+        no_search_index = not does_search_index_exist(self.folder_path)
 
-        self.index = index
+        if not (self.quick_load and no_search_index):
+            self.window_layout.insertWidget(0, top_row)
 
     def init_ui(self):
         self.images = collect_images(self.folder_path)

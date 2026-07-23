@@ -15,6 +15,9 @@ index_filename = ".search-index"
 def get_search_index_path(folder_path):
     return os.path.join(folder_path, index_filename)
 
+def does_search_index_exist(folder_path):
+    return os.path.exists(get_search_index_path(folder_path))
+
 def index_images(folder_path, quick_load: bool, progress_callback):
     image_data = []
 

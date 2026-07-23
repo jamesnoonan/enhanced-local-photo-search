@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QHBoxLayo
 
 from utils.ErrorUtils import show_error
 from utils.ImageUtils import open_folder
-from utils.SearchUtils import get_search_index_path
+from utils.SearchUtils import does_search_index_exist
 from utils.ThumbnailWorker import run_thumbnail_worker
 from widgets.ProgressBar import ProgressBar
 from widgets.Spinner import Spinner
@@ -77,8 +77,7 @@ class InitialView(QWidget):
             return row.removeWidget(loading_spinner)
 
     def create_thumbnails(self, folder_path: str, quick_load: bool):
-        search_index_path = get_search_index_path(folder_path)
-        search_index_exists = os.path.exists(search_index_path)
+        search_index_exists = does_search_index_exist(folder_path)
 
         try:
             if (not search_index_exists) or (not quick_load):
