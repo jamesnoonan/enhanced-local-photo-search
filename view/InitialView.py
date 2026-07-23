@@ -1,3 +1,4 @@
+import os
 import sys
 
 from PyQt6.QtCore import Qt
@@ -5,6 +6,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QHBoxLayo
 
 from utils.ErrorUtils import show_error
 from utils.ImageUtils import open_folder
+from utils.SearchUtils import get_search_index_path
 from utils.ThumbnailWorker import run_thumbnail_worker
 from widgets.ProgressBar import ProgressBar
 from widgets.Spinner import Spinner
@@ -20,7 +22,6 @@ class InitialView(QWidget):
         self.column.setSpacing(2)
 
         self.progress_bar = ProgressBar("Creating thumbnails...", "Please wait")
-
         self.init_selection_ui()
 
     def init_selection_ui(self):
@@ -76,8 +77,11 @@ class InitialView(QWidget):
             return row.removeWidget(loading_spinner)
 
     def create_thumbnails(self, folder_path: str, quick_load: bool):
+        search_index_path = get_search_index_path(folder_path)
+        search_index_exists = os.path.exists(search_index_path)
+
         try:
-            if not quick_load:
+            if (not search_index_exists) or (not quick_load):
                 run_thumbnail_worker(
                     folder_path,
                     self,

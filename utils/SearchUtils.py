@@ -12,19 +12,19 @@ from utils.PathUtils import get_original_image_path
 
 index_filename = ".search-index"
 
+def get_search_index_path(folder_path):
+    return os.path.join(folder_path, index_filename)
+
 def index_images(folder_path, quick_load: bool, progress_callback):
     image_data = []
 
-    file_path = os.path.join(folder_path, index_filename)
+    file_path = get_search_index_path(folder_path)
     if os.path.exists(file_path):
         with open(file_path, "r") as index_file:
             image_data = json.load(index_file)
             if quick_load:
                 return convert_index_to_absolute(folder_path, image_data)
-
-    if quick_load:
-        # Missing index, so we will probably need to create thumbnails
-        # and index from the start
+    elif quick_load:
         return []
 
     thumbnail_folder_path = os.path.join(folder_path, thumbnail_dir_name)
