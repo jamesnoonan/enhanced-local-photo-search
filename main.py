@@ -13,7 +13,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.initial_view = InitialView(self.open_folder)
+        self.initial_view = InitialView(self.show_results_screen)
         self.stack = QStackedWidget()
         self.search_view = None
         self.init_ui()
@@ -26,18 +26,6 @@ class MainWindow(QMainWindow):
 
         self.stack.addWidget(self.initial_view)
         self.setCentralWidget(self.stack)
-
-    def open_folder(self, folder_path, quick_load: bool):
-        try:
-            if not quick_load:
-                run_thumbnail_worker(folder_path, self, lambda x: print(x.progress), lambda: self.show_results_screen(folder_path, quick_load))
-            else:
-                self.show_results_screen(folder_path, quick_load)
-
-        except Exception as error:
-            print(error)
-            show_error("An error occurred: " + str(error))
-            sys.exit(1)
 
     def show_results_screen(self, folder_path: str, quick_load: bool):
         if not self.search_view:

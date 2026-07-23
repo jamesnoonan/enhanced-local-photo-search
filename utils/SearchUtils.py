@@ -25,7 +25,7 @@ def index_images(folder_path, quick_load: bool, progress_callback):
     if quick_load:
         # Missing index, so we will probably need to create thumbnails
         # and index from the start
-        create_thumbnails(folder_path, print)
+        return []
 
     thumbnail_folder_path = os.path.join(folder_path, thumbnail_dir_name)
     thumbnail_paths = collect_images(thumbnail_folder_path)

@@ -1,7 +1,12 @@
+import sys
+
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QHBoxLayout
 
+from utils.ErrorUtils import show_error
 from utils.ImageUtils import open_folder
+from utils.ThumbnailWorker import run_thumbnail_worker
+from widgets.ProgressBar import ProgressBar
 from widgets.Spinner import Spinner
 
 
@@ -13,6 +18,8 @@ class InitialView(QWidget):
         self.column = QVBoxLayout()
         self.column.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.column.setSpacing(2)
+
+        self.progress_bar = ProgressBar("Creating thumbnails...", "Please wait")
 
         self.init_selection_ui()
 
@@ -45,9 +52,7 @@ class InitialView(QWidget):
     def init_indexing_ui(self):
         clear_layout(self.column)
 
-        self.column.addWidget(QLabel("<h3>Creating thumbnails...</h3>"), alignment=Qt.AlignmentFlag.AlignHCenter)
-        self.column.addWidget(QLabel("Please wait"), alignment=Qt.AlignmentFlag.AlignHCenter)
-
+        self.column.addWidget(self.progress_bar)
         self.column.addSpacing(10)
         self.column.addWidget(Spinner(), alignment=Qt.AlignmentFlag.AlignHCenter)
 
@@ -65,10 +70,27 @@ class InitialView(QWidget):
         try:
             folder_path = open_folder("Choose source folder")
             self.init_indexing_ui()
-            self.callback(folder_path, quick_load)
+            self.create_thumbnails(folder_path, quick_load)
         except Exception as e:
             print(e)
             return row.removeWidget(loading_spinner)
+
+    def create_thumbnails(self, folder_path: str, quick_load: bool):
+        try:
+            if not quick_load:
+                run_thumbnail_worker(
+                    folder_path,
+                    self,
+                    lambda x: self.progress_bar.set_progress(x.progress, x.total),
+                    lambda: self.callback(folder_path, quick_load)
+                )
+            else:
+                self.callback(folder_path, quick_load)
+
+        except Exception as error:
+            print(error)
+            show_error("An error occurred: " + str(error))
+            sys.exit(1)
 
 def clear_layout(layout):
     while layout.count():
