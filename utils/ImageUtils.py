@@ -7,7 +7,6 @@ from PyQt6.QtWidgets import QFileDialog
 
 from utils.ErrorUtils import show_error
 from utils.PathUtils import get_thumbnail_path
-from widgets.ProgressDialog import show_progress_dialog
 
 page_size_limit = 120
 thumbnail_dir_name = ".thumbnails"
@@ -16,7 +15,7 @@ image_extensions = ('.png', '.jpg', '.jpeg', '.bmp', '.gif', '.webp', '.tif', '.
 def is_image_file(filename):
     return os.path.splitext(filename.lower())[1] in image_extensions
 
-def collect_images(directory_path):
+def collect_images(directory_path: str, limit: int | None = None) -> list[str]:
     image_list: list[str] = []
     for root, dirs, files in os.walk(directory_path):
         if thumbnail_dir_name in dirs:
@@ -26,10 +25,17 @@ def collect_images(directory_path):
             if is_image_file(file):
                 full_path = os.path.join(root, file)
                 image_list.append(os.path.normpath(full_path))
+
+                if limit is not None and len(image_list) >= limit:
+                    return sorted(
+                        image_list,
+                        key=lambda path: os.path.basename(path).lower()
+                    )
+
     return sorted(image_list, key=lambda path: os.path.basename(path).lower())
 
-def collect_thumbnails(directory_path):
-    return collect_images(os.path.join(directory_path, thumbnail_dir_name))
+def collect_thumbnails(directory_path: str, limit: int | None = None ) -> list[str]:
+    return collect_images(os.path.join(directory_path, thumbnail_dir_name), limit)
 
 def open_folder(text="Select Folder"):
     folder_path = QFileDialog.getExistingDirectory(None, text)
