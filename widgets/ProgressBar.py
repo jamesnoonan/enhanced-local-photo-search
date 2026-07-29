@@ -25,7 +25,7 @@ class ProgressBar(QWidget):
         self.setLayout(column)
 
     def set_title(self, title: str):
-        self.title_label.setText(title)
+        self.title_label.setText("<h3>" + title + "</h3>")
 
     def set_subtitle(self, subtitle: str):
         self.subtitle_label.setText(subtitle)
