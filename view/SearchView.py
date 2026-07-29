@@ -35,7 +35,7 @@ class SearchView(QWidget):
         self.window_layout = QVBoxLayout()
         self.progress_bar = ProgressBar("Processing search results", "Initializing...")
 
-        run_index_worker(folder_path, quick_load, self, self.on_index_progress, self.on_index_finish)
+        run_index_worker(folder_path, quick_load, self, self.on_images_collected, self.on_index_progress, self.on_index_finish)
 
         self.images = []
         self.filtered_images = []
@@ -157,6 +157,10 @@ class SearchView(QWidget):
         self.scroll_area.setWidget(self.image_grid)
 
         self.update()
+
+    def on_images_collected(self, collected_images: list[str]):
+        self.images = collected_images
+        self.update_results(self.images)
 
     def on_index_progress(self, progress):
         subtitle = "Indexing results..." if progress > 0 else "Loading model..."

@@ -2,18 +2,19 @@ import json
 import os
 
 from utils.ImageCaptioner import ImageCaptioner
-from utils.ImageUtils import thumbnail_dir_name, collect_images
+from utils.ImageUtils import thumbnail_dir_name, collect_images, collect_thumbnails
 from utils.PathUtils import get_thumbnail_path, get_original_image_path
 from utils.SearchUtils import get_search_index_path, convert_index_to_absolute
 from PyQt6.QtCore import QObject, pyqtSignal, QThread
 
-def run_index_worker(folder_path: str, quick_load: bool, parent, progress_callback, finished_callback):
+def run_index_worker(folder_path: str, quick_load: bool, parent, images_collected_callback, progress_callback, finished_callback):
     parent.thread = QThread(parent)
     parent.worker = IndexWorker(folder_path, quick_load)
 
     parent.worker.moveToThread(parent.thread)
-
     parent.thread.started.connect(parent.worker.run)
+
+    parent.worker.images_collected.connect(images_collected_callback)
     parent.worker.progress.connect(progress_callback)
     parent.worker.finished.connect(finished_callback)
 
@@ -30,6 +31,7 @@ class IndexProgress:
         self.total = total
 
 class IndexWorker(QObject):
+    images_collected = pyqtSignal(list)
     progress = pyqtSignal(object)
     finished = pyqtSignal(object)
 
@@ -62,8 +64,10 @@ class IndexWorker(QObject):
         elif quick_load:
             return []
 
-        thumbnail_folder_path = os.path.join(folder_path, thumbnail_dir_name)
-        thumbnail_paths = collect_images(thumbnail_folder_path)
+        thumbnail_paths = collect_thumbnails(folder_path)
+
+        image_paths = [get_original_image_path(thumbnail) for thumbnail in thumbnail_paths]
+        self.images_collected.emit(image_paths.copy())
 
         # Remove images that already appear in the list
         for i, entry in enumerate(image_data):
