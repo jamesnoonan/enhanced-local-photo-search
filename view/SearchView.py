@@ -44,11 +44,11 @@ class SearchView(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        if self.index is None:
-            self.images = collect_images(self.folder_path, limit=page_size_limit)
-            if len(self.images) == 0: # Fallback to showing thumbnails
-                thumbnails = collect_thumbnails(self.folder_path, limit=page_size_limit)
-                self.images = [get_original_image_path(thumbnail) for thumbnail in thumbnails]
+        # if self.index is None:
+        #     self.images = collect_images(self.folder_path, limit=page_size_limit)
+        #     if len(self.images) == 0: # Fallback to showing thumbnails
+        #         thumbnails = collect_thumbnails(self.folder_path, limit=page_size_limit)
+        #         self.images = [get_original_image_path(thumbnail) for thumbnail in thumbnails]
 
         self.scroll_area = QScrollArea()
 
