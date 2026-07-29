@@ -3,8 +3,6 @@ import sys
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QMainWindow, QStackedWidget
 
-from utils.ErrorUtils import show_error
-from utils.ThumbnailWorker import run_thumbnail_worker
 from view.InitialView import InitialView
 from view.SearchView import SearchView
 

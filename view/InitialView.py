@@ -1,4 +1,3 @@
-import os
 import sys
 
 from PyQt6.QtCore import Qt
@@ -74,7 +73,8 @@ class InitialView(QWidget):
             self.create_thumbnails(folder_path, quick_load)
         except Exception as e:
             print(e)
-            return row.removeWidget(loading_spinner)
+            row.removeWidget(loading_spinner)
+            return
 
     def create_thumbnails(self, folder_path: str, quick_load: bool):
         search_index_exists = does_search_index_exist(folder_path)

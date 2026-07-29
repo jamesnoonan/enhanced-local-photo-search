@@ -1,5 +1,3 @@
-from widgets.ProgressDialog import show_progress_dialog
-
 class ImageCaptioner:
     def __init__(self):
         # Load imports on init

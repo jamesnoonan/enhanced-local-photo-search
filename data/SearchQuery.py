@@ -30,7 +30,7 @@ class SearchQuery:
         self.search_ai_data = search_ai_data
 
     def does_entry_match_query(self, filename: str, ai_data: str, file_extension: str):
-        # Handle inclusion of filenames and ai data
+        # Handle inclusion of filenames and AI data
         entry_data: str = ""
         if self.search_filenames:
             entry_data = filename

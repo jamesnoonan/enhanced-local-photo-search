@@ -7,7 +7,7 @@ import sys
 from PyQt6.QtWidgets import QMessageBox
 
 from utils.ImageCaptioner import ImageCaptioner
-from utils.ImageUtils import collect_images, thumbnail_dir_name, get_thumbnail_path, create_thumbnails
+from utils.ImageUtils import collect_images, thumbnail_dir_name, get_thumbnail_path
 from utils.PathUtils import get_original_image_path
 
 index_filename = ".search-index"
