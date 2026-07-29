@@ -33,7 +33,7 @@ class SearchView(QWidget):
         self.index = None
 
         self.window_layout = QVBoxLayout()
-        self.progress_bar = ProgressBar("Processing search results", "Loading model...")
+        self.progress_bar = ProgressBar("Processing search results", "Initializing...")
 
         run_index_worker(folder_path, quick_load, self, self.on_index_progress, self.on_index_finish)
 
@@ -159,7 +159,8 @@ class SearchView(QWidget):
         self.update()
 
     def on_index_progress(self, progress):
-        self.progress_bar.set_subtitle("Indexing results...")
+        subtitle = "Indexing results..." if progress > 0 else "Loading model..."
+        self.progress_bar.set_subtitle(subtitle)
         self.progress_bar.set_progress(progress.progress, progress.total)
 
     def on_index_finish(self, index):

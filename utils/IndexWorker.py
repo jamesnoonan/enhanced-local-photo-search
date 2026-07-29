@@ -77,9 +77,10 @@ class IndexWorker(QObject):
         if len(thumbnail_paths) == 0:
             return convert_index_to_absolute(folder_path, image_data)
 
-        image_captioner = ImageCaptioner()
         total_to_index = len(thumbnail_paths)
         progress_callback(0, total_to_index)
+
+        image_captioner = ImageCaptioner()
 
         for i, image_path in enumerate(thumbnail_paths):
             print(f"{i+1} of {len(thumbnail_paths)} {image_path}")
