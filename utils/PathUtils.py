@@ -1,6 +1,8 @@
 import os
+from pathlib import Path
 
-def get_thumbnail_path(root_path, img_path):
+
+def get_thumbnail_path(root_path: str, img_path: str):
     """
     Return the thumbnail path under root_path/.thumbnails, preserving subfolders.
     Works with absolute or relative img_path.
@@ -21,11 +23,9 @@ def get_thumbnail_path(root_path, img_path):
     thumb_path = os.path.join(thumb_dir, thumb_filename)
     return os.path.normpath(thumb_path)
 
-def get_original_image_path(thumbnail_path):
-    parts = thumbnail_path.split(os.sep)
-
-    # Keep track if path was absolute
-    is_absolute = thumbnail_path.startswith(os.sep)
+def get_original_image_path(thumbnail_path: str):
+    p = Path(thumbnail_path)
+    parts = list(p.parts)
 
     # Remove the first occurrence of ".thumbnails"
     try:
@@ -35,20 +35,15 @@ def get_original_image_path(thumbnail_path):
 
     # Rebuild path without the ".thumbnails" directory
     original_parts = parts[:thumb_index] + parts[thumb_index + 1:]
-    original_dir, thumb_filename = os.path.split(os.path.join(*original_parts))
+    thumb_filename = original_parts.pop()
 
     # Extract original filename
     name, _ = os.path.splitext(thumb_filename)
     if "_" not in name:
         raise ValueError(f"Thumbnail filename does not follow expected format: {thumb_filename}")
 
-    base_name, orig_ext = name.rsplit("_", 1)
-    original_filename = f"{base_name}.{orig_ext}"
+    base_name, original_ext = name.rsplit("_", 1)
+    original_filename = f"{base_name}.{original_ext}"
+    original_parts.append(original_filename)
 
-    original_path = os.path.join(original_dir, original_filename)
-
-    # Prepend leading slash if the original thumbnail path was absolute
-    if is_absolute and not original_path.startswith(os.sep):
-        original_path = os.sep + original_path
-
-    return os.path.normpath(original_path)
+    return os.path.normpath(os.path.join(*original_parts))

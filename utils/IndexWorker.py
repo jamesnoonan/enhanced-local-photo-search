@@ -35,7 +35,7 @@ class IndexWorker(QObject):
     progress = pyqtSignal(object)
     finished = pyqtSignal(object)
 
-    def __init__(self, folder_path, quick_load):
+    def __init__(self, folder_path: str, quick_load: bool):
         super().__init__()
         self.folder_path = folder_path
         self.quick_load = quick_load
