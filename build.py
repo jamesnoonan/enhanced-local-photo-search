@@ -10,5 +10,6 @@ PyInstaller.__main__.run([
     '-i', 'icon.png',
     '-n', 'Enhanced Local Photo Search',
     '--windowed',
+    '--noconfirm',
     'main.py',
 ])
