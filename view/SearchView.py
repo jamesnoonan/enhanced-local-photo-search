@@ -163,7 +163,7 @@ class SearchView(QWidget):
         self.update_results(self.images)
 
     def on_index_progress(self, progress):
-        subtitle = "Indexing results..." if progress > 0 else "Loading model..."
+        subtitle = "Indexing results..." if progress.progress > 0 else "Loading model..."
         self.progress_bar.set_subtitle(subtitle)
         self.progress_bar.set_progress(progress.progress, progress.total)
 
