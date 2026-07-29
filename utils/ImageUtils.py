@@ -3,6 +3,7 @@ import subprocess
 import sys
 
 from PIL import Image
+from PyQt6.QtCore import QStandardPaths
 from PyQt6.QtWidgets import QFileDialog
 
 from utils.ErrorUtils import show_error
@@ -38,7 +39,9 @@ def collect_thumbnails(directory_path: str, limit: int | None = None ) -> list[s
     return collect_images(os.path.join(directory_path, thumbnail_dir_name), limit)
 
 def open_folder(text="Select Folder"):
-    folder_path = QFileDialog.getExistingDirectory(None, text)
+    pictures_folder_path = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.PicturesLocation)
+
+    folder_path = QFileDialog.getExistingDirectory(None, text, pictures_folder_path)
     if not folder_path:
        raise AssertionError("Folder not found")
 

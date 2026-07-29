@@ -73,7 +73,6 @@ class IndexWorker(QObject):
             if thumbnail_path in thumbnail_paths:
                 thumbnail_paths.remove(thumbnail_path)
 
-
         # Exit early if no new files
         if len(thumbnail_paths) == 0:
             return convert_index_to_absolute(folder_path, image_data)
