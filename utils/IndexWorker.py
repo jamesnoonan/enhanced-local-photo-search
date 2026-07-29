@@ -2,7 +2,7 @@ import json
 import os
 
 from utils.ImageCaptioner import ImageCaptioner
-from utils.ImageUtils import thumbnail_dir_name, collect_images, collect_thumbnails
+from utils.ImageUtils import collect_thumbnails
 from utils.PathUtils import get_thumbnail_path, get_original_image_path
 from utils.SearchUtils import get_search_index_path, convert_index_to_absolute
 from PyQt6.QtCore import QObject, pyqtSignal, QThread
@@ -61,13 +61,13 @@ class IndexWorker(QObject):
                 image_data = json.load(index_file)
                 if quick_load:
                     return convert_index_to_absolute(folder_path, image_data)
-        elif quick_load:
-            return []
 
         thumbnail_paths = collect_thumbnails(folder_path)
-
         image_paths = [get_original_image_path(thumbnail) for thumbnail in thumbnail_paths]
         self.images_collected.emit(image_paths.copy())
+
+        if quick_load:
+            return None
 
         # Remove images that already appear in the list
         for i, entry in enumerate(image_data):
@@ -93,7 +93,7 @@ class IndexWorker(QObject):
             caption = image_captioner.caption(image_path)
             absolute_path = get_original_image_path(image_path)
             relative_path = os.path.relpath(absolute_path, start=folder_path)
-            image_data.append({ "path": relative_path, "filename": filename.lower(), "caption": caption.lower()  })
+            image_data.append({ "path": relative_path, "filename": filename.lower(), "caption": caption.lower() })
 
             progress_callback(i+1, total_to_index)
 

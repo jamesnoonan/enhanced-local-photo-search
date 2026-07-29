@@ -6,9 +6,8 @@ from PyQt6.QtWidgets import QWidget, QScrollArea, QVBoxLayout, QApplication, QPr
 
 from data.SearchQuery import SearchQuery
 from utils.ErrorUtils import show_error
-from utils.ImageUtils import collect_images, page_size_limit, open_folder, open_file, collect_thumbnails
+from utils.ImageUtils import page_size_limit, open_folder, open_file
 from utils.IndexWorker import run_index_worker
-from utils.PathUtils import get_original_image_path
 from utils.SearchUtils import does_search_index_exist
 from widgets.ImageGrid import ImageGrid
 from widgets.Pagination import PaginationControls
@@ -168,17 +167,19 @@ class SearchView(QWidget):
         self.progress_bar.set_progress(progress.progress, progress.total)
 
     def on_index_finish(self, index):
-        self.index = index
-        self.images = self.get_all_images_from_index()
-        self.update_results(self.images)
+        if index is not None:
+            self.index = index
+            self.images = self.get_all_images_from_index()
+            self.update_results(self.images)
 
         # Remove progress bar
         self.window_layout.removeWidget(self.progress_bar)
         self.progress_bar.deleteLater()
 
         # Add search box
-        top_row = SearchBar(self.on_search, self.on_export, self.folder_path)
-        no_search_index = not does_search_index_exist(self.folder_path)
+        if index is not None:
+            top_row = SearchBar(self.on_search, self.on_export, self.folder_path)
+            no_search_index = not does_search_index_exist(self.folder_path)
 
-        if not (self.quick_load and no_search_index):
-            self.window_layout.insertWidget(0, top_row)
+            if not (self.quick_load and no_search_index):
+                self.window_layout.insertWidget(0, top_row)
