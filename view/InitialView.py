@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLabel, QHBoxLayo
 from utils.ErrorUtils import show_error
 from utils.ImageUtils import open_folder
 from utils.SearchUtils import does_search_index_exist
-from utils.ThumbnailWorker import run_thumbnail_worker
+from utils.ThumbnailWorker import run_thumbnail_worker, ThumbnailProgress
 from widgets.ProgressBar import ProgressBar
 from widgets.Spinner import Spinner
 
@@ -20,7 +20,7 @@ class InitialView(QWidget):
         self.column.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.column.setSpacing(2)
 
-        self.progress_bar = ProgressBar("Creating thumbnails...", "Please wait")
+        self.progress_bar = ProgressBar("Finding images...", "Please wait")
         self.init_selection_ui()
 
     def init_selection_ui(self):
@@ -84,7 +84,7 @@ class InitialView(QWidget):
                 run_thumbnail_worker(
                     folder_path,
                     self,
-                    lambda x: self.progress_bar.set_progress(x.progress, x.total),
+                    self.on_thumbnail_progress,
                     lambda: self.callback(folder_path, quick_load)
                 )
             else:
@@ -94,6 +94,10 @@ class InitialView(QWidget):
             print(error)
             show_error("An error occurred: " + str(error))
             sys.exit(1)
+
+    def on_thumbnail_progress(self, progress: ThumbnailProgress):
+        self.progress_bar.set_title("Creating thumbnails...")
+        self.progress_bar.set_progress(progress.progress, progress.total)
 
 def clear_layout(layout):
     while layout.count():
